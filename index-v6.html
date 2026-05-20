@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BorderBuddy — Accompagnement TPB</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#345A4D">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BorderBuddy">
+<link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+<link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: #f5f5f5;
+  color: #333;
+}
+
+.app {
+  max-width: 600px;
+  margin: 0 auto;
+  background: white;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+  background: linear-gradient(135deg, #4E7C6B 0%, #345A4D 100%);
+  color: white;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.header h1 {
+  font-size: 28px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.header-logo {
+  width: 40px;
+  height: 40px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #4E7C6B;
+  font-size: 20px;
+}
+
+/* CONTENT */
+.content {
+  padding: 20px;
+  min-height: 80vh;
+}
+
+/* SECTIONS */
+.section {
+  display: none;
+}
+
+.section.active {
+  display: block;
+}
+
+.card {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.card h3 {
+  margin-top: 0;
+  color: #345A4D;
+}
+
+/* BOUTONS */
+.btn {
+  background: #4E7C6B;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+
+.btn:hover {
+  background: #345A4D;
+}
+
+.btn-download {
+  background: #B8893A;
+}
+
+.btn-download:hover {
+  background: #a07a2f;
+}
+
+.btn-admin {
+  background: #C2714F;
+}
+
+.btn-admin:hover {
+  background: #a85a40;
+}
+
+/* NAV */
+.nav {
+  display: flex;
+  justify-content: space-around;
+  background: #f0f0f0;
+  border-top: 1px solid #ddd;
+  padding: 10px 0;
+  gap: 5px;
+}
+
+.nav button {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 10px 5px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #666;
+  border-bottom: 3px solid transparent;
+}
+
+.nav button.active {
+  color: #4E7C6B;
+  border-bottom-color: #4E7C6B;
+}
+
+/* MODAL */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+}
+
+.modal h2 {
+  color: #345A4D;
+  margin-bottom: 20px;
+}
+
+.modal input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.error {
+  color: #C2714F;
+  margin-bottom: 15px;
+  display: none;
+}
+
+/* LIVRET */
+.livret-banner {
+  background: linear-gradient(135deg, #B8893A 0%, #C2714F 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.livret-banner h2 {
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+
+.livret-banner p {
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- HEADER -->
+  <div class="header">
+    <h1>
+      <div class="header-logo">BB</div>
+      BorderBuddy
+    </h1>
+  </div>
+
+  <!-- CONTENU PRINCIPAL -->
+  <div class="content">
+    <!-- SECTION ACCUEIL -->
+    <div class="section active" id="home-section">
+      <h2>Bienvenue</h2>
+      
+      <!-- BANNIÈRE LIVRET -->
+      <div class="livret-banner">
+        <h2>📖 Livret Thérapeutique</h2>
+        <p>Votre compagnon complet : comprendre le TPB, gérer les crises, surfer les émotions</p>
+        <button class="btn btn-download" onclick="downloadLivret()">
+          📥 Télécharger le livret (52 pages)
+        </button>
+      </div>
+
+      <div class="card">
+        <h3>À propos de BorderBuddy</h3>
+        <p>Une application de psychoéducation et gestion de crise pour le trouble de la personnalité borderline.</p>
+        <p><strong>Contenu :</strong></p>
+        <ul>
+          <li>✅ Livret thérapeutique complet (52 pages)</li>
+          <li>✅ Fiches d'information</li>
+          <li>✅ Mises en situation quotidiennes</li>
+          <li>✅ Outils de gestion de crise</li>
+          <li>✅ Plan de crise personnalisé</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>🔐 Accès Admin</h3>
+        <p>Pour ajouter ou modifier du contenu</p>
+        <button class="btn btn-admin" onclick="openAdmin()">Accès Admin</button>
+      </div>
+    </div>
+
+    <!-- SECTION RESSOURCES -->
+    <div class="section" id="resources-section">
+      <h2>Ressources</h2>
+      
+      <div class="card">
+        <h3>📖 Livret Thérapeutique</h3>
+        <p>52 pages de psychoéducation DBT complète couvrant :</p>
+        <ul>
+          <li>Ch.1 : Introduction au TPB</li>
+          <li>Ch.2 : Diagnostic et causes</li>
+          <li>Ch.3 : Message pour les proches</li>
+          <li>Ch.4 : Gestion des émotions</li>
+          <li>Ch.5 : Hypersensibilité relationnelle</li>
+          <li>Ch.6 : Gestion de l'impulsivité</li>
+          <li>Ch.7 : Dissociation et ancrage</li>
+          <li>Ch.8 : Plan de crise</li>
+        </ul>
+        <button class="btn btn-download" onclick="downloadLivret()">
+          📥 Télécharger
+        </button>
+      </div>
+
+      <div class="card">
+        <h3>📚 Associations</h3>
+        <ul>
+          <li><strong>AFTPB</strong> - https://www.borderline-aftpb.com/</li>
+          <li><strong>AFORPEL</strong> - https://www.aforpel.org/</li>
+          <li><strong>AAPEL</strong> - https://aapel.org/</li>
+          <li><strong>Connexions Familiales</strong> - https://proches-borderline.org/</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>☎️ Urgence</h3>
+        <p><strong>3114</strong> - Numéro national de prévention du suicide (gratuit, 24h/24)</p>
+        <p><strong>SOS Amitié</strong> - 09 72 39 40 50 (écoute)</p>
+      </div>
+    </div>
+
+    <!-- SECTION FICHES -->
+    <div class="section" id="fiches-section">
+      <h2>Fiches Informations</h2>
+      
+      <div class="card">
+        <h3>🎭 Gestion des Émotions</h3>
+        <p>Les émotions des personnes atteintes de TPB sont intenses et changeantes. Elles peuvent passer rapidement de l'une à l'autre.</p>
+        <p><strong>Voir aussi dans le livret :</strong> Chapitre 4 (p. 18-29)</p>
+      </div>
+
+      <div class="card">
+        <h3>💔 Peur de l'Abandon</h3>
+        <p>La peur intense d'être abandonné ou rejeté est un trait central du TPB. Elle peut sembler disproportionnée face à la réalité.</p>
+        <p><strong>Voir aussi dans le livret :</strong> Chapitre 5 (p. 30-32)</p>
+      </div>
+
+      <div class="card">
+        <h3>🔥 Impulsivité</h3>
+        <p>L'impulsivité se manifeste par des actions rapides sans réfléchir aux conséquences, souvent pour soulager une émotion intense.</p>
+        <p><strong>Voir aussi dans le livret :</strong> Chapitre 6 (p. 39-40)</p>
+      </div>
+
+      <div class="card">
+        <h3>👁️ Dissociation</h3>
+        <p>La dissociation est un mécanisme de défense face à une charge émotionnelle trop intense. On se sent détaché ou hors de son corps.</p>
+        <p><strong>Voir aussi dans le livret :</strong> Chapitre 7 (p. 42-43)</p>
+      </div>
+    </div>
+
+    <!-- SECTION OUTILS -->
+    <div class="section" id="tools-section">
+      <h2>Outils de Crise</h2>
+      
+      <div class="card">
+        <h3>🌊 Techniques Rapides</h3>
+        <ul>
+          <li><strong>Glaçons :</strong> Tenir un glaçon serré dans la main</li>
+          <li><strong>Eau froide :</strong> Plonger le visage dans l'eau très froide</li>
+          <li><strong>Sport :</strong> Courir sur place, faire des pompes (5 min)</li>
+          <li><strong>Respiration :</strong> Inspirer 5 sec, expirer 5 sec (cohérence cardiaque)</li>
+          <li><strong>Ancrage 5-4-3-2-1 :</strong> Nommer 5 choses vues, 4 entendues, 3 touchées, 2 senties, 1 goûtée</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>📞 En cas de crise grave</h3>
+        <p>Appeler immédiatement :</p>
+        <ul>
+          <li>✅ Personne de confiance</li>
+          <li>✅ Thérapeute ou psychiatre</li>
+          <li>✅ <strong>3114</strong> (suicide)</li>
+          <li>✅ <strong>15 (SAMU)</strong> ou <strong>112</strong> (urgence)</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>📋 Plan de Crise Personnel</h3>
+        <p>À remplir avec votre thérapeute. Consultez le livret (p. 49-51) pour un modèle complet.</p>
+        <p><strong>Éléments clés :</strong></p>
+        <ul>
+          <li>Mes signaux d'alerte (VERT)</li>
+          <li>Mes signaux de danger (ORANGE)</li>
+          <li>Mes signaux critiques (ROUGE)</li>
+          <li>Mes techniques pour chaque niveau</li>
+          <li>Mes contacts d'urgence</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVIGATION -->
+  <div class="nav">
+    <button class="active" onclick="showSection('home-section')">🏠 Accueil</button>
+    <button onclick="showSection('resources-section')">📚 Ressources</button>
+    <button onclick="showSection('fiches-section')">📋 Fiches</button>
+    <button onclick="showSection('tools-section')">🆘 Outils</button>
+  </div>
+</div>
+
+<!-- MODAL ADMIN -->
+<div class="modal" id="admin-modal">
+  <div class="modal-content">
+    <h2>🔐 Accès Admin</h2>
+    <p>Entrez le mot de passe pour accéder à la modification du contenu</p>
+    <div class="error" id="error-msg">❌ Mot de passe incorrect</div>
+    <input type="password" id="admin-pwd" placeholder="Mot de passe" onkeypress="if(event.key==='Enter') checkAdminPwd()">
+    <button class="btn btn-admin" onclick="checkAdminPwd()">Valider</button>
+    <button class="btn" onclick="closeAdmin()" style="background: #999;">Annuler</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// CONFIGURATION ADMIN
+// ═══════════════════════════════════════════
+const ADMIN_PASSWORD = "BorderBuddy2024";
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function showSection(sectionId) {
+  // Masquer toutes les sections
+  document.querySelectorAll('.section').forEach(sec => {
+    sec.classList.remove('active');
+  });
+  
+  // Masquer tous les boutons actifs
+  document.querySelectorAll('.nav button').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  // Afficher la section demandée
+  document.getElementById(sectionId).classList.add('active');
+  
+  // Activer le bouton correspondant
+  event.target.classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+// ADMIN
+// ═══════════════════════════════════════════
+function openAdmin() {
+  document.getElementById('admin-modal').classList.add('show');
+  document.getElementById('admin-pwd').focus();
+  document.getElementById('error-msg').style.display = 'none';
+  document.getElementById('admin-pwd').value = '';
+}
+
+function closeAdmin() {
+  document.getElementById('admin-modal').classList.remove('show');
+}
+
+function checkAdminPwd() {
+  const pwd = document.getElementById('admin-pwd').value;
+  
+  console.log('🔐 Tentative connexion admin');
+  console.log('Mot de passe entré:', pwd);
+  console.log('Mot de passe attendu:', ADMIN_PASSWORD);
+  console.log('Longueur entré:', pwd.length);
+  console.log('Longueur attendu:', ADMIN_PASSWORD.length);
+  console.log('Correspondance:', pwd === ADMIN_PASSWORD);
+  
+  if (pwd === ADMIN_PASSWORD) {
+    alert('✅ Accès admin activé !\n\nVous pouvez maintenant modifier le contenu.\n\nFonctionnalité à développer.');
+    closeAdmin();
+  } else {
+    console.log('❌ ÉCHEC - Mots de passe ne correspondent pas');
+    document.getElementById('error-msg').style.display = 'block';
+    document.getElementById('admin-pwd').value = '';
+    setTimeout(() => {
+      document.getElementById('admin-pwd').focus();
+    }, 100);
+  }
+}
+
+// ═══════════════════════════════════════════
+// LIVRET
+// ═══════════════════════════════════════════
+function downloadLivret() {
+  console.log('📥 Téléchargement du livret...');
+  
+  // Vérifier que le fichier existe
+  fetch('./livret-borderbuddy.pdf', { method: 'HEAD' })
+    .then(response => {
+      if (response.ok) {
+        // Le fichier existe, le télécharger
+        const link = document.createElement('a');
+        link.href = './livret-borderbuddy.pdf';
+        link.download = 'livret-borderbuddy.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        console.log('✅ Téléchargement lancé');
+      } else {
+        alert('❌ Le livret n\'est pas disponible.\n\nVérifiez que le fichier "livret-borderbuddy.pdf" est dans le même dossier que cette app.');
+        console.error('Fichier non trouvé (404)');
+      }
+    })
+    .catch(error => {
+      alert('❌ Erreur lors du téléchargement.\n\nVérifiez la console pour les détails.');
+      console.error('Erreur:', error);
+    });
+}
+
+// ═══════════════════════════════════════════
+// INITIALISATION
+// ═══════════════════════════════════════════
+console.log('BorderBuddy v6 - Initialisé');
+console.log('Mot de passe admin:', ADMIN_PASSWORD);
+</script>
+
+</body>
+</html>
