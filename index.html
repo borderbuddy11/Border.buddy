@@ -1,0 +1,2235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BorderBuddy — Accompagnement borderline</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#345A4D">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BorderBuddy">
+<link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Nunito:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #F8F4EE;
+  --paper:    #FFFDF9;
+  --paper2:   #FDF8F1;
+  --text:     #2C2416;
+  --soft:     #5C4D3A;
+  --muted:    #9A8A76;
+  --line:     #EDE5D8;
+
+  --sage:     #4E7C6B;
+  --sage-d:   #345A4D;
+  --sage-l:   #E3EEE9;
+  --sage-m:   #9BBFB2;
+
+  --terra:    #C2714F;
+  --terra-l:  #F5E6DC;
+
+  --gold:     #B8893A;
+  --gold-l:   #F7EDDA;
+
+  --plum:     #8A6B8A;
+  --plum-l:   #EDE3ED;
+
+  --slate:    #5A6878;
+  --slate-l:  #EBEEf2;
+
+  --yellow:   #C09428;
+  --yellow-bg:#FAF2DC;
+  --yellow-b: #E8CB80;
+
+  --orange:   #C06030;
+  --orange-bg:#F8E2D0;
+  --orange-b: #E8A880;
+
+  --red:      #A82818;
+  --red-bg:   #F8DBD5;
+  --red-b:    #E09488;
+
+  --r: 18px;
+  --r-sm: 12px;
+  --shadow: 0 2px 12px rgba(44,36,22,.07);
+  --shadow-md: 0 4px 20px rgba(44,36,22,.10);
+}
+
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+body {
+  font-family:'Nunito',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* Texture papier subtile */
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:0;
+}
+
+.app {
+  display:flex; flex-direction:column; min-height:100vh;
+  max-width:480px; margin:0 auto;
+  background:var(--paper);
+  box-shadow:0 0 60px rgba(44,36,22,.10);
+  position:relative; z-index:1;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  padding:18px 22px 0;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.app-logo {
+  display:flex; align-items:center; gap:8px;
+}
+.app-logo-mark {
+  width:30px; height:30px;
+  background:linear-gradient(135deg,var(--sage),var(--sage-d));
+  border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+}
+.app-logo-mark svg { width:16px; height:16px; color:white; }
+.app-name {
+  font-family:'Fraunces',serif;
+  font-size:1.15rem; font-weight:400;
+  color:var(--sage-d);
+  font-style:italic;
+  letter-spacing:-0.01em;
+}
+.topbar-right { display:flex; align-items:center; gap:8px; }
+.streak-pill {
+  display:flex; align-items:center; gap:5px;
+  font-size:12px; font-weight:600;
+  color:var(--gold);
+  background:var(--gold-l);
+  padding:5px 11px; border-radius:20px;
+}
+.admin-btn {
+  width:30px; height:30px;
+  background:var(--line);
+  border:none; border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; color:var(--muted);
+  transition:all .2s;
+}
+.admin-btn:hover { background:var(--sage-l); color:var(--sage-d); }
+.admin-btn svg { width:14px; height:14px; }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position:sticky; bottom:0;
+  background:var(--paper);
+  border-top:1px solid var(--line);
+  display:flex; z-index:50;
+  padding-bottom:env(safe-area-inset-bottom);
+  box-shadow:0 -4px 20px rgba(44,36,22,.05);
+}
+.nav-btn {
+  flex:1; padding:11px 4px 9px;
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  border:none; background:none; cursor:pointer;
+  color:var(--muted); transition:color .2s;
+  font-family:inherit;
+}
+.nav-btn.active { color:var(--sage-d); }
+.nav-btn svg { width:21px; height:21px; }
+.nav-btn span { font-size:10px; font-weight:600; letter-spacing:0.02em; }
+
+.screen { display:none; flex:1; overflow-y:auto; padding-bottom:24px; }
+.screen.active { display:block; }
+
+/* ══════ HOME ══════ */
+.home-hero {
+  background:linear-gradient(150deg, #3D6B5B 0%, #2A4A40 100%);
+  padding:36px 26px 54px;
+  color:white;
+  position:relative; overflow:hidden;
+}
+/* Vague bas du hero */
+.home-hero::after {
+  content:'';
+  position:absolute; bottom:-1px; left:0; right:0;
+  height:32px;
+  background:var(--paper);
+  clip-path:ellipse(55% 100% at 50% 100%);
+}
+/* Cercles déco */
+.hero-orbs {
+  position:absolute; inset:0; pointer-events:none;
+}
+.hero-orb {
+  position:absolute; border-radius:50%;
+  background:rgba(255,255,255,.07);
+}
+.home-hero .greeting {
+  font-size:13px; opacity:.8;
+  margin-bottom:10px; font-weight:400;
+  letter-spacing:0.03em;
+}
+.home-hero h1 {
+  font-family:'Fraunces',serif;
+  font-size:1.85rem; font-weight:300;
+  line-height:1.2; letter-spacing:-0.02em;
+  margin-bottom:20px;
+}
+.home-hero h1 em { font-style:italic; color:#D4C89A; }
+
+/* Bouton crise home */
+.crisis-btn-home {
+  margin:6px 22px 0;
+  display:flex; align-items:center; gap:14px;
+  background:var(--red-bg);
+  border:1px solid var(--red-b);
+  border-left:3px solid var(--red);
+  border-radius:var(--r);
+  padding:14px 18px;
+  cursor:pointer;
+  width:calc(100% - 44px);
+  text-align:left;
+  transition:all .2s;
+  font-family:inherit;
+}
+.crisis-btn-home:hover {
+  background:#f5c8c0;
+  transform:translateY(-1px);
+  box-shadow:var(--shadow-md);
+}
+.crisis-btn-icon {
+  width:38px; height:38px;
+  background:var(--red); border-radius:11px;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; position:relative;
+}
+.crisis-btn-icon::before {
+  content:'';
+  position:absolute; inset:-4px;
+  border-radius:15px;
+  border:2px solid var(--red);
+  opacity:0;
+  animation:ring 2.5s ease-out infinite;
+}
+@keyframes ring {
+  0% { opacity:.5; transform:scale(.9); }
+  100% { opacity:0; transform:scale(1.2); }
+}
+.crisis-btn-icon svg { width:18px; height:18px; color:white; }
+.crisis-btn-info strong {
+  display:block; font-size:14px; font-weight:700;
+  color:var(--red); letter-spacing:-0.01em;
+}
+.crisis-btn-info span { font-size:12px; color:#7A2010; line-height:1.4; }
+
+/* Sections home */
+.home-sections { padding:22px 22px 0; display:flex; flex-direction:column; gap:10px; }
+.section-card {
+  background:var(--paper2);
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  padding:16px 18px;
+  cursor:pointer;
+  display:flex; align-items:center; gap:14px;
+  transition:all .25s;
+  box-shadow:var(--shadow);
+}
+.section-card:hover {
+  border-color:var(--sage-m);
+  transform:translateY(-1px);
+  box-shadow:var(--shadow-md);
+  background:var(--paper);
+}
+.s-icon {
+  width:44px; height:44px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.s-info strong { display:block; font-size:14px; font-weight:700; margin-bottom:1px; }
+.s-info span { font-size:12.5px; color:var(--muted); line-height:1.4; }
+.s-arrow { margin-left:auto; color:var(--muted); flex-shrink:0; }
+.s-arrow svg { width:15px; height:15px; }
+
+/* Citation home */
+.home-quote {
+  margin:22px 22px 0;
+  background:var(--gold-l);
+  border-radius:var(--r);
+  padding:20px 22px 18px;
+  position:relative;
+  overflow:hidden;
+}
+.home-quote::before {
+  content:'"';
+  position:absolute; top:2px; left:12px;
+  font-family:'Fraunces',serif;
+  font-size:4rem; color:var(--gold);
+  opacity:.2; line-height:1;
+}
+.home-quote-text {
+  font-family:'Fraunces',serif;
+  font-style:italic; font-weight:300;
+  font-size:1rem; line-height:1.55;
+  color:var(--soft);
+  padding-left:20px; position:relative;
+}
+.home-quote-src {
+  font-size:11px; color:var(--muted); margin-top:8px;
+  text-align:right; font-weight:600;
+  letter-spacing:0.06em; text-transform:uppercase;
+}
+.home-quote { cursor:pointer; }
+.home-quote:hover { opacity:.95; }
+.quote-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--gold); opacity:.3;
+  transition:opacity .3s;
+  display:inline-block;
+}
+.quote-dot.active { opacity:1; }
+.quote-fade-in { animation:qFade .5s ease; }
+@keyframes qFade { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+/* ══════ SCREEN HEADER ══════ */
+.screen-header { padding:24px 22px 18px; }
+.eyebrow {
+  font-size:11px; font-weight:700;
+  color:var(--terra); letter-spacing:0.12em;
+  text-transform:uppercase; margin-bottom:4px;
+}
+.screen-header h2 {
+  font-family:'Fraunces',serif;
+  font-size:1.55rem; font-weight:400;
+  letter-spacing:-0.01em; margin-bottom:4px;
+}
+.screen-header p { font-size:13.5px; color:var(--muted); }
+
+/* ══════ FICHES ══════ */
+.fiche-card {
+  margin:0 22px 18px;
+  background:linear-gradient(160deg, var(--sage-l) 0%, #EDF4F0 100%);
+  border:1px solid #CDE0D8;
+  border-radius:20px;
+  padding:26px 24px;
+  position:relative; overflow:hidden;
+  box-shadow:var(--shadow);
+}
+.fiche-card-deco {
+  position:absolute;
+  top:-24px; right:-24px;
+  width:90px; height:90px;
+  border-radius:50%;
+  background:var(--sage-m);
+  opacity:.18;
+}
+.fiche-card-deco2 {
+  position:absolute;
+  bottom:-16px; left:-16px;
+  width:54px; height:54px;
+  border-radius:50%;
+  background:var(--sage);
+  opacity:.10;
+}
+.fiche-day {
+  font-size:11px; font-weight:700;
+  color:var(--sage-d); letter-spacing:0.1em;
+  text-transform:uppercase; margin-bottom:10px;
+  display:flex; align-items:center; gap:8px;
+}
+.fiche-day::before {
+  content:'';
+  display:inline-block; width:20px; height:2px;
+  background:var(--sage); border-radius:2px;
+}
+.fiche-title {
+  font-family:'Fraunces',serif;
+  font-size:1.3rem; font-weight:400;
+  line-height:1.25; letter-spacing:-0.01em;
+  margin-bottom:16px;
+  position:relative;
+}
+.fiche-body {
+  font-size:14.5px; color:var(--soft);
+  line-height:1.8; position:relative;
+}
+.fiche-body strong { color:var(--sage-d); font-weight:700; }
+.fiche-body em {
+  font-style:italic; color:var(--terra);
+  font-family:'Fraunces',serif;
+}
+.fiche-key { margin:0 22px 18px; }
+.fiche-key-label {
+  font-size:10.5px; font-weight:700;
+  color:var(--muted); text-transform:uppercase;
+  letter-spacing:0.1em; margin-bottom:9px;
+}
+.key-pills { display:flex; flex-wrap:wrap; gap:7px; }
+.key-pill {
+  background:var(--paper);
+  border:1.5px solid var(--line);
+  border-radius:20px; padding:5px 13px;
+  font-size:12.5px; font-weight:600;
+  color:var(--soft);
+}
+.fiche-nav { display:flex; gap:10px; padding:0 22px; margin-top:6px; }
+.fiche-nav button {
+  flex:1; padding:12px; border-radius:12px;
+  font-family:inherit; font-size:13.5px; font-weight:700;
+  cursor:pointer; transition:all .2s;
+}
+.btn-outline { background:none; border:2px solid var(--sage); color:var(--sage-d); }
+.btn-outline:hover { background:var(--sage-l); }
+.btn-outline:disabled { opacity:.35; cursor:not-allowed; }
+.btn-solid { background:var(--sage); border:2px solid var(--sage); color:white; }
+.btn-solid:hover { background:var(--sage-d); border-color:var(--sage-d); }
+.fiche-counter {
+  text-align:center; margin:12px 0 0;
+  font-size:11.5px; color:var(--muted); font-weight:600;
+  letter-spacing:0.04em;
+}
+
+/* ══════ QUIZ ══════ */
+.quiz-progress-bar {
+  margin:0 22px 20px;
+  background:var(--line); border-radius:10px;
+  height:5px; overflow:hidden;
+}
+.quiz-progress-fill {
+  background:linear-gradient(90deg,var(--sage),var(--sage-d));
+  height:5px; border-radius:10px; transition:width .4s;
+}
+.quiz-q {
+  margin:0 22px 16px;
+  background:linear-gradient(150deg,var(--sage-l),#ECF2EE);
+  border:1px solid #CDE0D8;
+  border-radius:16px; padding:22px 22px;
+}
+.quiz-num {
+  font-size:11px; font-weight:700;
+  color:var(--sage); text-transform:uppercase;
+  letter-spacing:0.1em; margin-bottom:8px;
+}
+.quiz-q p {
+  font-family:'Fraunces',serif;
+  font-size:1.1rem; font-weight:400;
+  line-height:1.45; letter-spacing:-0.005em;
+}
+.quiz-options {
+  padding:0 22px; display:flex; flex-direction:column; gap:9px;
+}
+.quiz-opt {
+  background:var(--paper2);
+  border:1.5px solid var(--line);
+  border-radius:13px; padding:13px 16px;
+  font-size:14px; cursor:pointer;
+  text-align:left; font-family:inherit;
+  transition:all .2s; line-height:1.5;
+  color:var(--text); font-weight:500;
+  box-shadow:var(--shadow);
+}
+.quiz-opt:hover:not(:disabled) {
+  border-color:var(--sage-m);
+  background:var(--sage-l);
+  transform:translateY(-1px);
+}
+.quiz-opt.helpful { border-color:#4A8F5C; background:#E5F3E9; color:#2A5C38; }
+.quiz-opt.risky { border-color:var(--terra); background:var(--terra-l); color:#7A3020; }
+.quiz-feedback {
+  margin:14px 22px 0; padding:16px 18px;
+  border-radius:13px; font-size:13.5px;
+  line-height:1.65; display:none;
+}
+.quiz-feedback.show { display:block; animation:fadeUp .3s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+.quiz-feedback.ok { background:#E5F3E9; border:1px solid #A5DCB5; color:#1A5230; }
+.quiz-feedback.ko { background:var(--terra-l); border:1px solid #DDB8A0; color:#642818; }
+.quiz-feedback.info { background:var(--gold-l); border:1px solid #DFC88A; color:#6A4818; }
+
+.quiz-analysis { margin:10px 22px 0; display:flex; flex-direction:column; gap:8px; }
+.analysis-card {
+  background:var(--paper2);
+  border:1.5px solid var(--line);
+  border-radius:12px; padding:12px 15px;
+}
+.analysis-cat {
+  font-size:10.5px; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.08em;
+  margin-bottom:6px;
+}
+.ac-trait { color:var(--terra); }
+.ac-dist { color:var(--plum); }
+.ac-skill { color:var(--sage-d); }
+.analysis-item { display:flex; align-items:center; gap:6px; margin-top:3px; flex-wrap:wrap; }
+.analysis-title { font-size:13px; font-weight:600; color:var(--text); }
+.alink {
+  font-size:11.5px; font-weight:700;
+  color:var(--sage-d); cursor:pointer;
+  border-bottom:1.5px dashed var(--sage-m);
+  padding-bottom:1px;
+}
+.alink:hover { color:var(--sage); }
+.quiz-next { margin:14px 22px 0; }
+.quiz-next button {
+  width:100%; padding:13px;
+  background:var(--sage); color:white;
+  border:none; border-radius:12px;
+  font-family:inherit; font-size:14px;
+  font-weight:700; cursor:pointer;
+}
+.quiz-next button:hover { background:var(--sage-d); }
+.quiz-result { padding:50px 22px; text-align:center; }
+.quiz-score {
+  font-family:'Fraunces',serif;
+  font-size:3.5rem; font-weight:300;
+  color:var(--sage-d); letter-spacing:-0.02em;
+}
+.quiz-result p { color:var(--muted); margin-top:10px; font-size:14px; line-height:1.65; }
+.quiz-result button {
+  margin-top:28px; padding:12px 32px;
+  background:var(--sage); color:white;
+  border:none; border-radius:12px;
+  font-family:inherit; font-size:14px;
+  font-weight:700; cursor:pointer;
+}
+
+/* ══════ CRISE ══════ */
+.crisis-hero {
+  background:linear-gradient(150deg, #5A2018, #8A3020);
+  padding:30px 24px 40px; color:white;
+  position:relative; overflow:hidden;
+}
+.crisis-hero::after {
+  content:''; position:absolute; bottom:-1px; left:0; right:0;
+  height:28px; background:var(--paper);
+  clip-path:ellipse(55% 100% at 50% 100%);
+}
+.crisis-hero h2 {
+  font-family:'Fraunces',serif;
+  font-size:1.5rem; font-weight:300;
+  margin-bottom:6px; letter-spacing:-0.01em;
+}
+.crisis-hero p { font-size:13.5px; opacity:.9; line-height:1.5; }
+
+.urgent-strip {
+  margin:14px 22px 0;
+  background:var(--red-bg);
+  border:1px solid var(--red-b);
+  border-radius:13px;
+  padding:12px 16px;
+  display:flex; align-items:center; gap:12px;
+}
+.urgent-icon {
+  width:34px; height:34px; background:var(--red);
+  border-radius:9px; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.urgent-icon svg { width:17px; height:17px; color:white; }
+.urgent-body strong {
+  display:block; font-size:12.5px; font-weight:700;
+  color:var(--red); margin-bottom:5px;
+}
+.urgent-nums { display:flex; gap:6px; flex-wrap:wrap; }
+.urgent-num {
+  background:var(--red); color:white;
+  border-radius:7px; padding:4px 11px;
+  font-size:13px; font-weight:700;
+  text-decoration:none; letter-spacing:0.02em;
+}
+
+.triage-section-title {
+  margin:22px 22px 11px;
+  font-size:12px; font-weight:700;
+  color:var(--muted);
+  text-transform:uppercase; letter-spacing:0.1em;
+}
+.triage-cards { padding:0 22px; display:flex; flex-direction:column; gap:10px; }
+.triage-card {
+  border:2px solid; border-radius:16px;
+  padding:17px 19px; cursor:pointer;
+  transition:all .25s;
+}
+.triage-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+.tc-yellow { background:var(--yellow-bg); border-color:var(--yellow); }
+.tc-orange { background:var(--orange-bg); border-color:var(--orange); }
+.tc-red { background:var(--red-bg); border-color:var(--red); }
+.tc-level {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:3px 10px; border-radius:20px;
+  font-size:10.5px; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.08em;
+  margin-bottom:9px;
+}
+.lv-yellow { background:var(--yellow); color:white; }
+.lv-orange { background:var(--orange); color:white; }
+.lv-red { background:var(--red); color:white; }
+.tc-title {
+  font-family:'Fraunces',serif;
+  font-size:1.15rem; font-weight:400;
+  margin-bottom:4px; letter-spacing:-0.005em;
+}
+.tc-desc { font-size:13px; color:var(--soft); line-height:1.5; }
+
+.triage-note {
+  padding:16px 22px 4px;
+  font-size:12.5px; color:var(--muted);
+  line-height:1.6; text-align:center; font-style:italic;
+}
+.triage-plan { padding:10px 22px 22px; }
+
+.crisis-panel { display:none; }
+.crisis-panel.active { display:block; }
+.panel-banner {
+  padding:20px 24px 30px; color:white;
+  position:relative; overflow:hidden;
+}
+.panel-banner::after {
+  content:''; position:absolute; bottom:-1px; left:0; right:0;
+  height:22px; background:var(--paper);
+  clip-path:ellipse(55% 100% at 50% 100%);
+}
+.pb-yellow { background:linear-gradient(135deg, #C8981E, #B08020); }
+.pb-orange { background:linear-gradient(135deg, #C86020, #A84810); }
+.pb-red    { background:linear-gradient(135deg, #B83018, #8A1E10); }
+.pb-teal   { background:linear-gradient(135deg, var(--sage), var(--sage-d)); }
+.pb-slate  { background:linear-gradient(135deg, #5A6878, #3A4858); }
+.panel-banner strong {
+  display:block; font-family:'Fraunces',serif;
+  font-size:1.3rem; font-weight:400; margin-bottom:4px;
+}
+
+.back-btn {
+  margin:16px 22px 0; background:var(--paper);
+  border:1.5px solid var(--line); border-radius:10px;
+  padding:8px 14px; font-family:inherit;
+  font-size:12.5px; font-weight:700; color:var(--muted);
+  cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+  transition:all .2s;
+}
+.back-btn:hover { border-color:var(--muted); color:var(--text); }
+
+.panel-content { padding:18px 22px 0; }
+.panel-content h3 {
+  font-family:'Fraunces',serif;
+  font-size:1.1rem; font-weight:500;
+  margin:16px 0 10px; letter-spacing:-0.005em;
+}
+.panel-content p { font-size:13.5px; color:var(--soft); line-height:1.65; }
+.callout {
+  background:var(--gold-l);
+  border-left:3px solid var(--gold);
+  border-radius:10px; padding:12px 14px;
+  font-size:13px; line-height:1.55;
+  color:#6A4818; margin-bottom:16px;
+}
+
+.alt-grid { display:flex; flex-direction:column; gap:10px; }
+.alt-card { border-radius:12px; padding:13px 15px; border:1px solid; }
+.alt-orange { background:var(--orange-bg); border-color:var(--orange-b); }
+.alt-sage   { background:var(--sage-l); border-color:#C8DDD5; }
+.alt-cat {
+  font-size:10.5px; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;
+}
+.alt-card ul { padding-left:15px; }
+.alt-card li { font-size:13.5px; color:var(--soft); line-height:1.7; }
+
+.red-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.btn-edit-red {
+  background:var(--paper); border:1.5px solid var(--red-b);
+  color:var(--red); border-radius:8px; padding:5px 12px;
+  font-family:inherit; font-size:12px; font-weight:700;
+  cursor:pointer; display:flex; align-items:center; gap:5px;
+}
+.btn-edit-red:hover { background:var(--red-bg); }
+.red-action-list { display:flex; flex-direction:column; gap:9px; }
+.red-action {
+  background:var(--paper); border:2px solid var(--red-b);
+  border-radius:13px; padding:13px 15px;
+  display:flex; gap:11px; align-items:center;
+  box-shadow:var(--shadow);
+}
+.red-num {
+  width:30px; height:30px;
+  background:linear-gradient(135deg,var(--red),#801810);
+  color:white; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:13px; flex-shrink:0;
+  font-family:'Fraunces',serif;
+  box-shadow:0 2px 6px rgba(168,40,24,.3);
+}
+.red-icon { font-size:22px; flex-shrink:0; }
+.red-txt { flex:1; }
+.red-txt strong { display:block; font-size:14px; font-weight:700; margin-bottom:2px; }
+.red-txt span { font-size:12.5px; color:var(--muted); line-height:1.5; }
+.red-action.edit-mode { background:var(--red-bg); }
+.red-ctrls { display:flex; flex-direction:column; gap:3px; margin-left:auto; }
+.ctrl-btn {
+  background:var(--paper); border:1px solid var(--line);
+  border-radius:6px; width:26px; height:26px;
+  cursor:pointer; display:flex; align-items:center;
+  justify-content:center; font-size:13px; padding:0; font-family:inherit;
+}
+.ctrl-btn:hover { background:var(--bg); }
+.ctrl-btn.del { color:var(--red); }
+.edit-fields { flex:1; }
+.edit-fields input {
+  width:100%; border:1.5px solid var(--line);
+  border-radius:8px; padding:7px 10px;
+  font-family:inherit; font-size:13px; margin-bottom:5px;
+  background:var(--paper);
+}
+.edit-fields input:focus { outline:none; border-color:var(--red); }
+.add-red-btn {
+  width:100%; padding:11px;
+  background:var(--paper);
+  border:2px dashed var(--red-b);
+  color:var(--red); border-radius:10px;
+  font-family:inherit; font-size:13px; font-weight:700;
+  cursor:pointer; margin-top:10px;
+}
+.add-red-btn:hover { background:var(--red-bg); }
+.edit-bar { display:flex; gap:8px; margin-top:12px; }
+.edit-bar button {
+  flex:1; padding:10px; border-radius:9px;
+  font-family:inherit; font-size:13px;
+  font-weight:700; cursor:pointer; border:none;
+}
+.eb-save { background:var(--red); color:white; }
+.eb-reset { background:var(--paper); border:1.5px solid var(--line); color:var(--muted); }
+
+.plan-perso { display:flex; flex-direction:column; gap:13px; }
+.plan-label {
+  display:block; font-size:11.5px; font-weight:700;
+  color:var(--muted); text-transform:uppercase;
+  letter-spacing:0.08em; margin-bottom:6px;
+}
+.plan-perso textarea, .plan-perso input {
+  width:100%; border:2px solid var(--line);
+  border-radius:11px; padding:10px 14px;
+  font-family:inherit; font-size:13.5px;
+  background:var(--paper); resize:none;
+  transition:border-color .2s;
+}
+.plan-perso textarea:focus, .plan-perso input:focus {
+  outline:none; border-color:var(--sage-m);
+}
+.plan-save {
+  width:100%; padding:12px;
+  background:var(--sage); color:white; border:none;
+  border-radius:11px; font-family:inherit;
+  font-size:14px; font-weight:700; cursor:pointer; margin-top:4px;
+}
+.plan-save:hover { background:var(--sage-d); }
+.plan-saved {
+  text-align:center; font-size:12.5px;
+  color:var(--sage-d); margin-top:8px;
+  font-weight:700; display:none;
+}
+
+/* Encouragements */
+.encour-list { display:flex; flex-direction:column; gap:10px; }
+.encour-card {
+  background:linear-gradient(150deg, var(--sage-l), #EDF2EF);
+  border:1.5px solid #CDE0D8;
+  border-radius:14px; padding:16px;
+  display:flex; gap:12px; align-items:center;
+  box-shadow:var(--shadow);
+}
+.encour-play {
+  width:36px; height:36px; border-radius:50%;
+  background:var(--sage); border:none;
+  cursor:pointer; display:flex; align-items:center;
+  justify-content:center; flex-shrink:0;
+  transition:background .2s; box-shadow:0 2px 8px rgba(78,124,107,.3);
+}
+.encour-play:hover { background:var(--sage-d); }
+.encour-play svg { width:13px; height:13px; color:white; }
+.encour-text {
+  font-family:'Fraunces',serif;
+  font-size:1rem; font-weight:300;
+  line-height:1.5; flex:1; font-style:italic;
+}
+.encour-actions { padding:0 22px; margin-top:16px; display:flex; flex-direction:column; gap:10px; }
+.btn-record {
+  width:100%; padding:13px;
+  background:var(--terra); color:white; border:none;
+  border-radius:11px; font-family:inherit;
+  font-size:14px; font-weight:700; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.btn-record:hover { background:#9A5030; }
+.btn-record.recording { background:var(--red); animation:pulse 1.2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.75} }
+.recordings-list { margin:12px 0 0; display:flex; flex-direction:column; gap:7px; }
+.rec-item {
+  background:var(--terra-l); border:1.5px solid #DDBAAA;
+  border-radius:11px; padding:11px 14px;
+  display:flex; align-items:center; gap:10px;
+}
+.rec-name { flex:1; font-size:13px; font-weight:600; }
+.rec-play {
+  width:30px; height:30px; border-radius:50%;
+  background:var(--terra); border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+.rec-play svg { width:11px; height:11px; color:white; }
+.rec-del { background:none; border:none; color:var(--muted); cursor:pointer; font-size:16px; padding:4px; }
+
+/* Méditations */
+.med-list { display:flex; flex-direction:column; gap:9px; }
+.med-card { background:var(--paper); border:1.5px solid var(--line); border-radius:13px; overflow:hidden; box-shadow:var(--shadow); }
+.med-header { padding:13px 16px; display:flex; align-items:center; gap:12px; cursor:pointer; }
+.med-icon { width:38px; height:38px; border-radius:10px; background:var(--sage-l); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:17px; }
+.med-info strong { display:block; font-size:13.5px; font-weight:700; }
+.med-info span { font-size:11.5px; color:var(--muted); }
+.med-play { margin-left:auto; width:32px; height:32px; border-radius:50%; background:var(--sage); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.med-play svg { width:12px; height:12px; color:white; }
+.med-body { padding:0 16px 16px; font-size:13px; color:var(--soft); line-height:1.75; display:none; }
+.med-body.open { display:block; }
+.med-timer { display:flex; align-items:center; gap:10px; margin-top:10px; }
+.med-bar { flex:1; background:var(--line); border-radius:10px; height:4px; overflow:hidden; }
+.med-fill { background:var(--sage); height:4px; border-radius:10px; width:0%; transition:width .5s linear; }
+.med-time { font-size:11.5px; color:var(--muted); min-width:34px; text-align:right; font-weight:600; }
+.med-start-btn {
+  margin-top:10px; padding:7px 15px;
+  background:var(--sage); color:white; border:none;
+  border-radius:8px; font-family:inherit;
+  font-size:12.5px; font-weight:700; cursor:pointer;
+}
+
+.voice-select-wrap {
+  margin:13px 22px 0;
+  background:var(--gold-l); border:1.5px solid #DFC090;
+  border-radius:12px; padding:13px 15px;
+}
+.voice-select-wrap label {
+  display:block; font-size:11px; font-weight:700;
+  color:var(--gold); margin-bottom:6px;
+  text-transform:uppercase; letter-spacing:0.08em;
+}
+.voice-select-wrap select {
+  width:100%; border:1.5px solid #DFC090;
+  border-radius:8px; padding:8px 10px;
+  font-family:inherit; font-size:13px; background:white;
+}
+
+/* ══════ RESSOURCES ══════ */
+.res-tabs {
+  display:flex; overflow-x:auto; gap:8px;
+  padding:0 22px 16px; scrollbar-width:none;
+}
+.res-tabs::-webkit-scrollbar { display:none; }
+.res-tab {
+  padding:7px 16px; border-radius:20px;
+  font-size:12.5px; font-weight:700;
+  border:1.5px solid var(--line);
+  background:var(--paper2); color:var(--muted);
+  cursor:pointer; white-space:nowrap; font-family:inherit;
+  transition:all .2s;
+}
+.res-tab.active { background:var(--sage); border-color:var(--sage); color:white; }
+.res-list { padding:0 22px; display:flex; flex-direction:column; gap:10px; }
+.res-card { background:var(--paper2); border:1.5px solid var(--line); border-radius:13px; padding:14px 16px; box-shadow:var(--shadow); transition:border-color .2s; }
+.res-card:hover { border-color:var(--sage-m); }
+.res-card-title { font-size:14px; font-weight:700; margin-bottom:4px; }
+.res-card-desc { font-size:12.5px; color:var(--muted); line-height:1.55; }
+.res-tags { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
+.res-tag { font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:20px; }
+.rt-p { background:var(--sage-l); color:var(--sage-d); }
+.rt-f { background:var(--plum-l); color:var(--plum); }
+.rt-a { background:var(--gold-l); color:var(--gold); }
+.rt-g { background:var(--slate-l); color:var(--slate); }
+.res-card a { display:inline-flex; align-items:center; gap:5px; margin-top:7px; font-size:12px; font-weight:700; color:var(--sage-d); text-decoration:none; }
+
+/* ══════ AUDIO STATUS ══════ */
+.audio-status {
+  position:fixed; bottom:78px; left:50%; transform:translateX(-50%);
+  background:var(--text); color:white;
+  padding:8px 18px; border-radius:20px;
+  font-size:12.5px; font-weight:600;
+  display:none; z-index:200;
+  box-shadow:var(--shadow-md);
+}
+
+/* ══════ MODAL ══════ */
+.modal-overlay {
+  position:fixed; inset:0;
+  background:rgba(44,36,22,.5);
+  backdrop-filter:blur(4px);
+  display:none; align-items:center; justify-content:center;
+  z-index:300; padding:20px;
+}
+.modal-overlay.show { display:flex; animation:fadeIn .2s ease; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.modal {
+  background:var(--paper); border-radius:18px;
+  max-width:440px; width:100%;
+  max-height:82vh; overflow-y:auto;
+  padding:26px; position:relative;
+  box-shadow:0 20px 60px rgba(44,36,22,.2);
+}
+.modal-close {
+  position:absolute; top:13px; right:14px;
+  background:none; border:none; font-size:22px;
+  cursor:pointer; color:var(--muted);
+  width:30px; height:30px; display:flex; align-items:center; justify-content:center;
+}
+.modal-close:hover { color:var(--text); }
+.modal-eyebrow { font-size:10.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:6px; }
+.modal h3 { font-family:'Fraunces',serif; font-size:1.2rem; font-weight:400; margin-bottom:10px; padding-right:30px; }
+.modal p { font-size:14px; color:var(--soft); line-height:1.7; margin-bottom:10px; }
+.modal-fiche-btn {
+  display:inline-flex; align-items:center; gap:6px;
+  margin-top:8px; padding:9px 16px;
+  background:var(--sage); color:white;
+  border:none; border-radius:10px;
+  font-family:inherit; font-size:13px; font-weight:700; cursor:pointer;
+}
+.modal-fiche-btn:hover { background:var(--sage-d); }
+
+/* ══════ ADMIN PANEL ══════ */
+.admin-overlay {
+  position:fixed; inset:0;
+  background:rgba(44,36,22,.6);
+  backdrop-filter:blur(4px);
+  display:none; z-index:400;
+}
+.admin-overlay.show { display:flex; flex-direction:column; }
+.admin-panel {
+  background:var(--paper);
+  flex:1; overflow-y:auto;
+  max-width:480px; width:100%; margin:0 auto;
+  box-shadow:var(--shadow-md);
+}
+.admin-header {
+  background:linear-gradient(135deg, var(--sage), var(--sage-d));
+  padding:20px 22px; color:white;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:10;
+}
+.admin-header h2 { font-family:'Fraunces',serif; font-size:1.2rem; font-weight:400; }
+.admin-close {
+  background:rgba(255,255,255,.2); border:none;
+  border-radius:8px; color:white; padding:6px 12px;
+  font-family:inherit; font-size:13px; font-weight:700; cursor:pointer;
+}
+
+.admin-tabs {
+  display:flex; border-bottom:2px solid var(--line);
+  background:var(--paper); position:sticky; top:56px; z-index:9;
+}
+.admin-tab {
+  flex:1; padding:13px 8px;
+  font-size:12.5px; font-weight:700; text-align:center;
+  color:var(--muted); cursor:pointer;
+  border-bottom:3px solid transparent; margin-bottom:-2px;
+  background:none; border-left:none; border-right:none; border-top:none;
+  font-family:inherit; transition:all .2s;
+}
+.admin-tab.active { color:var(--sage-d); border-bottom-color:var(--sage); }
+
+.admin-section { display:none; padding:20px 22px; }
+.admin-section.active { display:block; }
+
+.admin-section h3 {
+  font-family:'Fraunces',serif; font-size:1.1rem;
+  font-weight:500; margin-bottom:14px;
+}
+/* Form admin */
+.admin-form { display:flex; flex-direction:column; gap:13px; }
+.admin-form .f-label {
+  display:block; font-size:11px; font-weight:700;
+  color:var(--muted); text-transform:uppercase;
+  letter-spacing:0.08em; margin-bottom:5px;
+}
+.admin-form input,
+.admin-form textarea,
+.admin-form select {
+  width:100%; border:2px solid var(--line);
+  border-radius:10px; padding:10px 13px;
+  font-family:inherit; font-size:13.5px;
+  background:var(--paper2); resize:none;
+  transition:border-color .2s;
+}
+.admin-form input:focus,
+.admin-form textarea:focus,
+.admin-form select:focus { outline:none; border-color:var(--sage-m); }
+.admin-form textarea { min-height:90px; }
+.admin-hint {
+  font-size:11.5px; color:var(--muted); line-height:1.5;
+  background:var(--gold-l); border-radius:8px;
+  padding:9px 12px; margin-bottom:4px;
+}
+.admin-hint strong { color:var(--gold); }
+
+.btn-add-item {
+  width:100%; padding:12px;
+  background:var(--sage); color:white; border:none;
+  border-radius:11px; font-family:inherit;
+  font-size:14px; font-weight:700; cursor:pointer;
+  margin-top:4px;
+}
+.btn-add-item:hover { background:var(--sage-d); }
+
+.admin-list { display:flex; flex-direction:column; gap:9px; margin-top:20px; }
+.admin-item {
+  background:var(--paper2); border:1.5px solid var(--line);
+  border-radius:12px; padding:12px 15px;
+  display:flex; align-items:flex-start; gap:10px;
+}
+.admin-item-info { flex:1; min-width:0; }
+.admin-item-title { font-size:13.5px; font-weight:700; color:var(--text); margin-bottom:2px; }
+.admin-item-sub { font-size:12px; color:var(--muted); line-height:1.4; }
+.admin-item-tag {
+  font-size:10px; font-weight:700;
+  padding:2px 7px; border-radius:20px;
+  background:var(--sage-l); color:var(--sage-d);
+  white-space:nowrap; flex-shrink:0;
+}
+.admin-item-del {
+  background:none; border:none; color:var(--muted);
+  cursor:pointer; font-size:18px; padding:2px; flex-shrink:0;
+}
+.admin-item-del:hover { color:var(--red); }
+
+.admin-save-msg {
+  background:var(--sage-l); border:1.5px solid var(--sage-m);
+  border-radius:10px; padding:10px 14px;
+  font-size:13px; font-weight:700; color:var(--sage-d);
+  text-align:center; display:none; margin-top:10px;
+}
+
+/* Password overlay */
+.pwd-overlay {
+  position:fixed; inset:0;
+  background:rgba(44,36,22,.7);
+  backdrop-filter:blur(6px);
+  display:none; align-items:center; justify-content:center;
+  z-index:500; padding:30px;
+}
+.pwd-overlay.show { display:flex; }
+.pwd-box {
+  background:var(--paper); border-radius:18px;
+  padding:30px; max-width:320px; width:100%;
+  text-align:center; box-shadow:var(--shadow-md);
+}
+.pwd-box h3 {
+  font-family:'Fraunces',serif; font-size:1.2rem;
+  font-weight:400; margin-bottom:8px;
+}
+.pwd-box p { font-size:13px; color:var(--muted); margin-bottom:16px; }
+.pwd-box input {
+  width:100%; border:2px solid var(--line);
+  border-radius:10px; padding:11px 14px;
+  font-family:inherit; font-size:15px;
+  text-align:center; letter-spacing:0.1em;
+  background:var(--paper2); margin-bottom:12px;
+}
+.pwd-box input:focus { outline:none; border-color:var(--sage-m); }
+.pwd-btns { display:flex; gap:8px; }
+.pwd-btns button {
+  flex:1; padding:11px;
+  border-radius:10px; font-family:inherit;
+  font-size:13.5px; font-weight:700; cursor:pointer; border:none;
+}
+.pwd-ok { background:var(--sage); color:white; }
+.pwd-ok:hover { background:var(--sage-d); }
+.pwd-cancel { background:var(--line); color:var(--muted); }
+.pwd-error { font-size:12.5px; color:var(--red); margin-top:8px; display:none; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="app-logo">
+      <div class="app-logo-mark">
+        <span style="font-family:'Georgia',serif;font-weight:700;font-size:13px;color:white;letter-spacing:-1px;">BB</span>
+      </div>
+      <span class="app-name">BorderBuddy</span>
+    </div>
+    <div class="topbar-right">
+      <div class="streak-pill" style="display:none;">🔥 <span>3</span> jours</div>
+      <button class="admin-btn" onclick="openInfo()" title="À propos" style="font-size:16px;">ℹ️</button>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div class="screen active" id="screen-home">
+    <div class="home-hero">
+      <div class="hero-orbs">
+        <div class="hero-orb" style="width:120px;height:120px;top:-30px;right:-20px;"></div>
+        <div class="hero-orb" style="width:70px;height:70px;bottom:20px;left:10px;opacity:.05;"></div>
+        <div class="hero-orb" style="width:50px;height:50px;top:30px;right:80px;opacity:.04;"></div>
+      </div>
+      <div class="greeting">Bonjour 👋</div>
+      <h1>BorderBuddy,<br><em>ton compagnon de route</em></h1>
+    </div>
+    <button class="crisis-btn-home" onclick="goCrisis()">
+      <div class="crisis-btn-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="crisis-btn-info">
+        <strong>Espace de crise</strong>
+        <span>Selon ton niveau, des outils adaptés</span>
+      </div>
+    </button>
+    <div class="home-sections">
+      <div class="section-card" onclick="showScreen('screen-fiche')">
+        <div class="s-icon" style="background:var(--sage-l)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#4E7C6B" stroke-width="1.8" width="22" height="22"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+        </div>
+        <div class="s-info"><strong>Fiches éducatives</strong><span>Une notion par jour, à ton rythme</span></div>
+        <div class="s-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+      <div class="section-card" onclick="showScreen('screen-quiz')">
+        <div class="s-icon" style="background:var(--gold-l)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#B8893A" stroke-width="1.8" width="22" height="22"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+        </div>
+        <div class="s-info"><strong>Mises en situation</strong><span>S'entraîner et comprendre</span></div>
+        <div class="s-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+      <div class="section-card" onclick="showScreen('screen-res')">
+        <div class="s-icon" style="background:var(--plum-l)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#8A6B8A" stroke-width="1.8" width="22" height="22"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        </div>
+        <div class="s-info"><strong>Ressources</strong><span>Associations, livres, podcasts</span></div>
+        <div class="s-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+    </div>
+    <div class="home-quote" id="home-quote-block" onclick="nextQuote()">
+      <div class="home-quote-text" id="home-quote-text"></div>
+      <div class="home-quote-src" id="home-quote-src"></div>
+      <div style="text-align:center;margin-top:10px;display:flex;justify-content:center;gap:5px;" id="quote-dots"></div>
+    </div>
+  </div>
+
+  <!-- FICHES -->
+  <div class="screen" id="screen-fiche">
+    <div class="screen-header">
+      <div class="eyebrow">Apprendre</div>
+      <h2>Fiches éducatives</h2>
+      <p>Une notion, à ton rythme.</p>
+    </div>
+    <div style="margin-bottom:12px;">
+      <select id="fiche-select" onchange="jumpToFiche(this.value)" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:13px;color:var(--text);background:var(--paper);cursor:pointer;"></select>
+    </div>
+    <div id="fiche-content"></div>
+    <div class="fiche-nav">
+      <button class="btn-outline" onclick="prevFiche()">← Précédente</button>
+      <span id="fiche-counter" style="font-size:13px;color:var(--muted);align-self:center;"></span>
+      <button class="btn-solid" onclick="nextFiche()">Suivante →</button>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="screen-quiz">
+    <div class="screen-header">
+      <div class="eyebrow">S'entraîner</div>
+      <h2>Mises en situation</h2>
+      <p>Des situations concrètes pour s'entraîner.</p>
+    </div>
+    <div style="margin-bottom:12px;">
+      <select id="quiz-select" onchange="jumpToQuiz(this.value)" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:13px;color:var(--text);background:var(--paper);cursor:pointer;"></select>
+    </div>
+    <div id="quiz-content"></div>
+  </div>
+
+  <!-- CRISE -->
+  <div class="screen" id="screen-crisis">
+    <div id="crisis-triage">
+      <div class="crisis-hero">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <h2 style="margin-bottom:0;">Espace de crise</h2>
+          <button onclick="openCrisisInfo()" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.35);color:white;border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">ℹ️ Construire mon plan de crise</button>
+        </div>
+        <p>Comment te sens-tu en ce moment ?</p>
+      </div>
+      <div class="urgent-strip">
+        <div class="urgent-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01"/></svg></div>
+        <div class="urgent-body">
+          <strong>En danger immédiat ?</strong>
+          <div class="urgent-nums">
+            <a class="urgent-num" href="tel:3114">3114</a>
+            <a class="urgent-num" href="tel:15">15</a>
+            <a class="urgent-num" href="tel:112">112</a>
+          </div>
+        </div>
+      </div>
+      <div class="triage-section-title">Choisis ton niveau</div>
+      <div class="triage-cards">
+        <div class="triage-card tc-yellow" onclick="showLevel('yellow')">
+          <span class="tc-level lv-yellow">🟡 Niveau 1</span>
+          <div class="tc-title">La tension monte</div>
+          <div class="tc-desc">Je sens quelque chose qui se prépare, j'arrive encore à réfléchir.</div>
+        </div>
+        <div class="triage-card tc-orange" onclick="showLevel('orange')">
+          <span class="tc-level lv-orange">🟠 Niveau 2</span>
+          <div class="tc-title">Je suis submergé·e</div>
+          <div class="tc-desc">Mes émotions débordent, j'ai du mal à penser clairement.</div>
+        </div>
+        <div class="triage-card tc-red" onclick="showLevel('red')">
+          <span class="tc-level lv-red">🔴 Niveau 3</span>
+          <div class="tc-title">Je suis en crise</div>
+          <div class="tc-desc">C'est trop, actions immédiates uniquement.</div>
+        </div>
+      </div>
+      <div class="triage-note">Tant que tu es au rouge, ne cherche pas à comprendre. Reviens d'abord au orange ou au jaune.</div>
+      <div class="triage-plan">
+        <button class="btn-outline" style="width:100%;padding:12px;border-radius:11px;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;" onclick="showLevel('plan')">📝 Mon plan personnel</button>
+        <button class="btn-outline" style="width:100%;padding:12px;border-radius:11px;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;margin-top:8px;" onclick="showLevel('encour')">🎙️ Mes encouragements</button>
+        <button class="btn-outline" style="width:100%;padding:12px;border-radius:11px;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;margin-top:8px;" onclick="showLevel('medit-crisis')">🧘 Méditations</button>
+      </div>
+    </div>
+
+    <!-- MÉDITATIONS CRISE -->
+    <div class="crisis-panel" id="level-medit-crisis">
+      <div class="panel-banner pb-teal"><strong>🧘 Méditations</strong>Prends le temps d'écouter.</div>
+      <button class="back-btn" onclick="backToTriage()">← Retour</button>
+      <div class="panel-content">
+        <div id="med-list-crisis"></div>
+      </div>
+    </div>
+
+    <!-- JAUNE -->
+    <div class="crisis-panel" id="level-yellow">
+      <div class="panel-banner pb-yellow"><strong>🟡 La tension monte</strong>Tu peux encore agir avant que ça s'aggrave.</div>
+      <button class="back-btn" onclick="backToTriage()">← Retour</button>
+      <div class="panel-content">
+        <h3>1. Pause et respire</h3>
+        <p>3 grandes respirations. Inspire 4 secondes, expire 6 secondes.</p>
+        <h3>2. Mets un mot sur l'émotion</h3>
+        <p>Colère, tristesse, peur, honte ? Nommer réduit l'intensité.</p>
+        <h3>3. Vérifie la réalité</h3>
+        <p>Est-ce aussi grave que tu le ressens ? Y a-t-il une autre façon de voir ?</p>
+        <h3>4. Choisis une action douce</h3>
+        <div class="alt-grid" style="margin-bottom:16px;">
+          <div class="alt-card alt-sage">
+            <div class="alt-cat" style="color:var(--sage-d)">🌿 Se recentrer</div>
+            <ul><li>Cohérence cardiaque 5 minutes</li><li>Sortir, marcher</li><li>Boisson chaude, musique apaisante</li></ul>
+          </div>
+          <div class="alt-card alt-sage">
+            <div class="alt-cat" style="color:var(--sage-d)">💬 Mettre des mots</div>
+            <ul><li>Écrire dans un carnet (Pennebaker)</li><li>Appeler quelqu'un de confiance</li></ul>
+          </div>
+        </div>
+        <button class="btn-outline" style="width:100%;padding:12px;border-radius:11px;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;margin-bottom:20px;" onclick="showLevel('encour')">💛 Encouragements</button>
+      </div>
+    </div>
+
+    <!-- ORANGE -->
+    <div class="crisis-panel" id="level-orange">
+      <div class="panel-banner pb-orange"><strong>🟠 Je suis submergé·e</strong>L'objectif : redescendre au jaune.</div>
+      <button class="back-btn" onclick="backToTriage()">← Retour</button>
+      <div class="panel-content">
+        <div class="callout">⚠️ <strong>Ne cherche pas à analyser maintenant.</strong> Choisis une action et fais-la.</div>
+        <h3>Stratégies — choisis-en une</h3>
+        <div class="alt-grid">
+          <div class="alt-card alt-orange"><div class="alt-cat" style="color:var(--orange)">🌊 Choc sensoriel</div><ul><li>Eau froide sur le visage</li><li>Glaçon dans la main</li><li>Goût fort (citron, piment)</li></ul></div>
+          <div class="alt-card alt-orange"><div class="alt-cat" style="color:var(--orange)">💪 Décharge physique</div><ul><li>Pompes, courir sur place</li><li>Crier dans un coussin</li><li>Danser sur de la musique forte</li></ul></div>
+          <div class="alt-card alt-orange"><div class="alt-cat" style="color:var(--orange)">🌬️ Respiration</div><ul><li>Respiration carrée : 4-4-4-4</li><li>Souffler à travers une paille</li></ul></div>
+        </div>
+        <h3>Méditations courtes</h3>
+        <div class="med-list" id="med-list-orange"></div>
+        <button class="btn-outline" style="width:100%;padding:12px;border-radius:11px;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;margin:16px 0;" onclick="showLevel('encour')">💛 Encouragements</button>
+      </div>
+    </div>
+
+    <!-- ROUGE -->
+    <div class="crisis-panel" id="level-red">
+      <div class="panel-banner pb-red"><strong>🔴 Je suis en crise</strong>Pas de réflexion. Juste traverser cet instant.</div>
+      <button class="back-btn" onclick="backToTriage()">← Retour</button>
+      <div class="panel-content">
+        <div class="urgent-strip" style="margin:0 0 16px;">
+          <div class="urgent-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 015.19 12a19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.37 1.91.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.9.33 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg></div>
+          <div class="urgent-body"><strong>Idées de te faire du mal ?</strong><div class="urgent-nums"><a class="urgent-num" href="tel:3114">3114 — 24h/24</a></div></div>
+        </div>
+        <div class="red-hdr">
+          <h3 style="margin:0;">Mes actions dans l'ordre</h3>
+          <button class="btn-edit-red" id="edit-mode-btn" onclick="toggleEditMode()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            <span id="edit-mode-label">Personnaliser</span>
+          </button>
+        </div>
+        <div class="red-action-list" id="red-actions-list"></div>
+        <button class="add-red-btn" id="add-action-btn" onclick="addAction()" style="display:none;">+ Ajouter une action</button>
+        <div class="edit-bar" id="edit-actions-bar" style="display:none;">
+          <button class="eb-reset" onclick="resetActions()">Réinitialiser</button>
+          <button class="eb-save" onclick="saveActions()">Terminer</button>
+        </div>
+        <button class="btn-outline" style="width:100%;padding:13px;border-radius:11px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin:16px 0;border-color:var(--terra);color:var(--terra);" onclick="showLevel('encour')">💛 Écouter les encouragements</button>
+        <p style="text-align:center;font-size:12.5px;color:var(--muted);line-height:1.6;padding:0 8px 20px;font-style:italic;">Quand l'intensité baisse, tu pourras passer au orange.</p>
+      </div>
+    </div>
+
+    <!-- ENCOURAGEMENTS -->
+    <div class="crisis-panel" id="level-encour">
+      <div class="panel-banner pb-teal"><strong>💛 Encouragements</strong>Écoute ce dont tu as besoin maintenant.</div>
+      <button class="back-btn" onclick="backToTriage()">← Retour</button>
+      <div class="panel-content">
+        <h3>Phrases préenregistrées</h3>
+        <div class="encour-list" id="encour-list"></div>
+        <h3 style="margin-top:22px;">Tes enregistrements personnels</h3>
+        <p style="font-size:12.5px;margin-bottom:12px;">Enregistre ta voix ou celle d'un proche.</p>
+        <div class="encour-actions" style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-record" id="record-btn" onclick="startRecording()" style="flex:1;">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><circle cx="12" cy="12" r="6"/></svg>
+            <span>Démarrer</span>
+          </button>
+          <button id="record-pause-btn" onclick="pauseRecording()" style="display:none;flex:1;padding:9px 14px;background:var(--gold-l);border:1px solid var(--gold);border-radius:9px;color:var(--gold);font-size:13px;font-weight:600;cursor:pointer;">
+            ⏸ Pause
+          </button>
+          <button id="record-stop-btn" onclick="stopRecording()" style="display:none;flex:1;padding:9px 14px;background:var(--terra-l);border:1px solid var(--terra);border-radius:9px;color:var(--terra);font-size:13px;font-weight:600;cursor:pointer;">
+            ⏹ Terminer
+          </button>
+        </div>
+        <p id="record-status" style="font-size:12px;color:var(--muted);margin-top:6px;text-align:center;"></p>
+        <div class="recordings-list" id="recordings-list"></div>
+      </div>
+    </div>
+
+    <!-- PLAN -->
+    <div class="crisis-panel" id="level-plan">
+      <div class="panel-banner pb-slate"><strong>📝 Mon plan personnel</strong>À remplir à tête reposée.</div>
+      <button class="back-btn" onclick="backToTriage()">← Retour</button>
+      <div class="panel-content">
+        <div class="plan-perso">
+          <div><label class="plan-label">🚨 Mes facteurs de vulnérabilité</label><textarea id="pf-vulnerabilite" rows="4" placeholder="Ex : manque de sommeil, menstruations, période de stress, isolement, conflit récent..."></textarea></div>
+          <div><label class="plan-label">⚠️ Mes signaux d'alerte</label><textarea id="pf-signaux" rows="4" placeholder="Ex : je m'isole, je deviens irritable, je n'arrive plus à manger..."></textarea></div>
+          <div><label class="plan-label">💙 Ce qui m'aide</label><textarea id="pf-aide" rows="4" placeholder="Ex : marcher, appeler ma sœur, prendre une douche froide..."></textarea></div>
+          <div><label class="plan-label">📞 Personnes à contacter</label><textarea id="pf-contacts" rows="4" placeholder="Nom, téléphone...&#10;Ex : Marie — 06 XX XX XX XX&#10;Mon thérapeute — 01 XX XX XX XX&#10;3114 (numéro national)"></textarea></div>
+          <div><label class="plan-label">🧘 Ma phrase d'ancrage</label><input id="pf-phrase" type="text" placeholder="Ex : Cette émotion va passer."></div>
+          <button class="plan-save" onclick="savePlan()">Enregistrer mon plan</button>
+          <div class="plan-saved" id="plan-saved-msg">✓ Plan enregistré</div>
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line);">
+            <button onclick="showLevel('encour')" style="width:100%;padding:11px;background:var(--sage-l);border:1px solid var(--sage-m);border-radius:10px;color:var(--sage-d);font-weight:600;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+              🎙️ Mes encouragements
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESSOURCES -->
+  <div class="screen" id="screen-res">
+    <div class="screen-header">
+      <div class="eyebrow">Pour aller plus loin</div>
+      <h2>Ressources</h2>
+    </div>
+    <div class="res-tabs" id="res-tabs"></div>
+    <div class="res-list" id="res-list"></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" onclick="showScreen('screen-home')" id="nav-home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Accueil</span>
+    </button>
+    <button class="nav-btn" onclick="showScreen('screen-fiche')" id="nav-fiche">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+      <span>Fiches</span>
+    </button>
+    <button class="nav-btn" onclick="showScreen('screen-quiz')" id="nav-quiz">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+      <span>Situations</span>
+    </button>
+    <button class="nav-btn" onclick="goCrisis()" id="nav-crisis" style="color:var(--red)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span>Crise</span>
+    </button>
+    <button class="nav-btn" onclick="showScreen('screen-res')" id="nav-res">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+      <span>Ressources</span>
+    </button>
+  </nav>
+</div>
+
+<div class="audio-status" id="audio-status"></div>
+
+<!-- INFO MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+
+<!-- INFO / DISCLAIMER -->
+<div class="pwd-overlay" id="info-overlay">
+  <div class="pwd-box" style="max-height:85vh;overflow-y:auto;max-width:420px;">
+    <h3 style="margin-bottom:12px;">💙 À propos de BorderBuddy</h3>
+    <p style="font-size:13.5px;line-height:1.7;color:#5C4D3A;margin-bottom:14px;">
+      J'ai développé cette application pour aider les personnes concernées par le trouble de la personnalité borderline — que vous soyez patient·e, proche ou soignant·e.
+    </p>
+    <p style="font-size:13.5px;line-height:1.7;color:#5C4D3A;margin-bottom:14px;">
+      ⚠️ <strong>BorderBuddy ne remplace pas un suivi thérapeutique.</strong> C'est un outil complémentaire qui peut vous aider entre les séances, mais il ne se substitue pas à un accompagnement par un professionnel de santé.
+    </p>
+    <p style="font-size:13.5px;line-height:1.7;color:#5C4D3A;margin-bottom:14px;">
+      Il peut être <strong>plus simple à utiliser avec l'aide d'un proche ou d'un soignant</strong>, surtout au début.
+    </p>
+    <p style="font-size:13.5px;line-height:1.7;color:#5C4D3A;margin-bottom:14px;">
+      🔒 <strong>Cette application ne collecte aucune donnée.</strong> Tout reste uniquement sur votre appareil.
+    </p>
+    <div style="background:#E3EEE9;border-radius:10px;padding:12px;margin-bottom:14px;">
+      <p style="font-size:13px;font-weight:700;color:#345A4D;margin-bottom:8px;">🎯 Ce que vous trouverez dans l'app :</p>
+      <p style="font-size:13px;color:#5C4D3A;line-height:1.8;">
+        📋 <strong>Fiches</strong> — Des explications claires sur les traits du TPB<br>
+        📌 <strong>Mises en situation</strong> — Des scénarios interactifs pour s'entraîner<br>
+        🆘 <strong>Gestion de crise</strong> — Un plan à 3 niveaux pour les moments difficiles<br>
+        📚 <strong>Ressources</strong> — Associations, livres, podcasts et un livret complet
+      </p>
+    </div>
+    <div style="background:#F7EDDA;border:1px solid #E8CB80;border-radius:10px;padding:12px;margin-bottom:14px;text-align:center;">
+      <p style="font-size:13px;color:#B8893A;font-weight:700;margin-bottom:8px;">📖 Livret thérapeutique — 52 pages</p>
+      <p style="font-size:12px;color:#5C4D3A;margin-bottom:10px;">Psychoéducation complète sur le TPB, outils DBT, plan de crise. À lire, annoter et imprimer.</p>
+      <a href="livret-borderbuddy.pdf" download style="display:inline-block;padding:9px 20px;background:#B8893A;color:white;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700;">📥 Télécharger le livret</a>
+    </div>
+    <div style="background:#E3EEE9;border:1px solid #9BBFB2;border-radius:10px;padding:12px;text-align:center;">
+      <p style="font-size:13px;color:#345A4D;font-weight:700;margin-bottom:8px;">📱 Installer BorderBuddy sur votre écran d'accueil</p>
+      <div id="install-zone">
+        <button id="install-btn" onclick="installApp()" style="display:inline-block;padding:9px 20px;background:#4E7C6B;color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;margin-bottom:8px;">⬇️ Installer l'app</button>
+        <p style="font-size:11px;color:#9A8A76;line-height:1.6;">
+          Si le bouton ne fonctionne pas :<br>
+          <strong>Android</strong> — Menu ⋮ → "Ajouter à l'écran d'accueil"<br>
+          <strong>iPhone</strong> — ⬆️ → "Sur l'écran d'accueil"
+        </p>
+      </div>
+    </div>
+    <div style="background:#F8DBD5;border-radius:10px;padding:12px;margin-bottom:16px;">
+      <p style="font-size:13px;color:#A82818;line-height:1.7;">
+        🆘 <strong>En cas de danger immédiat :</strong> appelez le <strong>3114</strong> (numéro national de prévention du suicide, gratuit 24h/24) ou le <strong>15</strong> (SAMU).
+      </p>
+    </div>
+    <p style="font-size:13px;color:#9A8A76;text-align:right;margin-bottom:16px;font-style:italic;">— Dr Sacha Valdenaire, psychiatre</p>
+    <div class="pwd-btns">
+      <button class="pwd-ok" onclick="closeInfo()" style="width:100%;">Compris, j'y vais ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- CRISIS INFO MODAL -->
+<div class="pwd-overlay" id="crisis-info-overlay">
+  <div class="pwd-box" style="max-height:85vh;overflow-y:auto;max-width:420px;">
+    <h3 style="margin-bottom:16px;">📝 Construire son plan de crise</h3>
+
+    <p style="font-size:13.5px;line-height:1.75;color:#5C4D3A;margin-bottom:14px;">
+      Le plan de crise est un outil essentiel pour éviter les débordements les plus intenses. Tu peux le construire avec des proches — leur regard extérieur complète souvent le tien.
+    </p>
+
+    <div style="background:#EDE3ED;border-left:3px solid #8A6B8A;border-radius:8px;padding:12px;margin-bottom:14px;">
+      <p style="font-size:13px;font-weight:700;color:#8A6B8A;margin-bottom:6px;">⚡ Connais tes facteurs de vulnérabilité</p>
+      <p style="font-size:13px;color:#5C4D3A;line-height:1.7;">Certaines situations du quotidien entament notre énergie et nous rendent plus sensibles — une mauvaise nuit, une dispute, les menstruations, une période de stress... Dans ces moments-là, on peut passer dans le rouge plus vite, parfois sans l'avoir vu venir. Les pointer permet d'adapter ses stratégies et de ne pas trop s'en demander quand on est déjà fragilisé.</p>
+    </div>
+
+    <div style="background:var(--yellow-bg);border-left:3px solid var(--gold);border-radius:8px;padding:12px;margin-bottom:14px;">
+      <p style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:6px;">🚨 Repère tes signaux d'alerte</p>
+      <p style="font-size:13px;color:#5C4D3A;line-height:1.7;">Avant d'être dans le rouge, il y a toujours des étapes. Les pointer t'aide à te mettre à l'abri <em>avant</em> d'y arriver. Ce sont tes indicateurs personnels — une irritabilité, un isolement, une pensée qui revient en boucle...</p>
+    </div>
+
+    <div style="background:var(--sage-l);border-left:3px solid var(--sage);border-radius:8px;padding:12px;margin-bottom:14px;">
+      <p style="font-size:13px;font-weight:700;color:var(--sage-d);margin-bottom:6px;">🛠️ Teste et garde tes meilleures techniques</p>
+      <p style="font-size:13px;color:#5C4D3A;line-height:1.7;">Il en existe des dizaines — et ce qui aide varie beaucoup d'une personne à l'autre. Teste-en plusieurs à froid, puis garde les 5 qui te conviennent le mieux. En crise, enchaîne-les jusqu'à redescendre un peu.</p>
+    </div>
+
+    <div style="background:var(--terra-l);border-left:3px solid var(--terra);border-radius:8px;padding:12px;margin-bottom:14px;">
+      <p style="font-size:13px;font-weight:700;color:var(--terra);margin-bottom:6px;">📞 Note tes contacts de confiance</p>
+      <p style="font-size:13px;color:#5C4D3A;line-height:1.7;">Être seul quand on est submergé est dangereux. Tu as peut-être peur de déranger ou d'inquiéter — mais en général, tes proches préfèrent savoir. Ne pas savoir et imaginer le pire est souvent bien plus angoissant pour eux que de recevoir un appel.</p>
+    </div>
+
+    <div style="background:var(--plum-l);border-left:3px solid var(--plum);border-radius:8px;padding:12px;margin-bottom:16px;">
+      <p style="font-size:13px;font-weight:700;color:var(--plum);margin-bottom:6px;">🎙️ Enregistre des encouragements</p>
+      <p style="font-size:13px;color:#5C4D3A;line-height:1.7;">Ta propre voix, celle d'un ami ou d'un proche, accessible en un clic au moment où tu en as le plus besoin — c'est l'un des outils les plus puissants. Dans les pires moments, entendre une voix familière peut tout changer.</p>
+    </div>
+
+    <div class="pwd-btns">
+      <button class="pwd-ok" onclick="closeCrisisInfo()" style="width:100%;">J'ai compris ✓</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ══════════ BASE DATA ══════════
+const BASE_FICHES = [
+  { id:'introduction', day:'Fiche 1', title:"C'est quoi le trouble borderline ?", body:`Le <strong>trouble borderline</strong> est un trouble psychique réel, qui touche <strong>environ 2% de la population</strong>.<br><br>Il se caractérise par une <strong>hypersensibilité dans les relations</strong>, une <strong>difficulté à gérer ses émotions</strong>, et une <strong>impulsivité importante</strong>.<br><br>Ce trouble se compose de <strong>9 traits principaux</strong> qui donnent des tableaux cliniques très variés d'une personne à l'autre. C'est pourquoi il est indispensable d'en parler avec son médecin pour poser un diagnostic — seul un professionnel peut le faire.<br><br>Parfois on parle de <strong>traits de personnalité borderline</strong> quand ceux-ci sont instables dans le temps ou peu nombreux. Ils peuvent néanmoins créer beaucoup de souffrance, même sans diagnostic complet.<br><br><em>La psychothérapie peut toujours aider à améliorer les choses — même quand tu as l'impression de stagner. Les progrès sont souvent invisibles de l'intérieur.</em>`, keys:['Trouble réel','2% population','Traitable'] },
+  { id:'ferrari', day:'Fiche 2', title:"Je suis une Ferrari émotionnelle", body:`Avoir un trouble borderline, c'est comme conduire une <em>Ferrari des émotions</em>.<br><br>Ton cerveau ressent les émotions <strong>plus vite et plus fort</strong> que la moyenne — comme un moteur de course là où les autres ont un moteur de ville. Le moindre événement déclenche une réaction intense, parfois avant même que tu aies le temps de réfléchir.<br><br>C'est pour ça que tu peux passer de <strong>zéro à cent en quelques secondes</strong>, que tes joies sont immenses et tes peines insupportables. Ce n'est pas du caprice ni de la faiblesse — <em>c'est ton fonctionnement. Ça n'excuse pas tout, mais ça explique.</em><br><br>La bonne nouvelle : une Ferrari, ça se pilote. Avec de l'entraînement, tu peux apprendre à conduire ce moteur sans partir dans le décor.`, keys:['Émotions plus vites','Neurologie','Ça se pilote'] },
+  { id:'jungle', day:'Fiche 3', title:"Le cerveau comme une jungle", body:`Le cerveau, c'est comme une <em>jungle</em>. Face à une situation, tu choisis une réaction. Cette réaction trace un petit chemin.<br><br>À force de répétition, le chemin devient une <strong>autoroute</strong>. C'est ainsi que se créent les schémas automatiques.<br><br><em>Exemple :</em> chaque fois que quelqu'un ne répond pas à ton message, tu catastrophises. Le chemin "pas de réponse → il me déteste" est devenu une autoroute dans ton cerveau — il se déclenche tout seul, sans que tu le choisisses.<br><br>Construire un nouveau chemin prend du temps et de l'énergie — mais c'est toujours possible. C'est exactement le but de la psychothérapie.`, keys:['Schémas automatiques','Nouveaux chemins','Temps et effort'] },
+  { id:'vague-surf', day:'Fiche 4', title:"On ne peut pas arrêter les vagues", body:`Les émotions sont comme des vagues. Elles arrivent, montent, redescendent. Parfois douces, parfois violentes. Et comme les vraies vagues, <strong>tu ne peux pas les contrôler.</strong><br><br>Face à une émotion forte, on a souvent trois réflexes :<br><br><strong>Les réprimer</strong> — faire comme si rien n'était. <em>("Je vais bien, ça ne me touche pas.")</em><br><strong>Les modifier</strong> — chercher à les éteindre rapidement. <em>(alcool, substances, automutilation, scrolling compulsif…)</em><br><strong>Les transformer</strong> — les remplacer par une autre émotion. <em>(la tristesse devient colère, plus facile à porter.)</em><br><br>Ces stratégies soulagent sur le moment — mais elles reviennent en <strong>effet rebond</strong>, encore plus intenses la prochaine fois.<br><br>Ce que tu peux apprendre à la place : <strong>surfer la vague.</strong> Ne pas la combattre, ne pas la fuir — juste la laisser passer. Avec de l'entraînement, tu peux te laisser porter sans te noyer. <em>Elle redescend toujours.</em>`, keys:['Effet rebond','Surfer la vague','Ça passe toujours'] },
+  { id:'pointer-emotions', day:'Fiche 5', title:"Pointer ses émotions", body:`Beaucoup de personnes concernées par le trouble borderline souffrent d'<strong>alexithymie</strong> : difficulté à identifier ses émotions, même quand le corps les manifeste. Ce qui fait qu'elles pointent trop tard leurs signaux d'alerte et se font submerger. <strong>Un meilleur pointage = moins de crises.</strong><br><br>Pour chaque émotion forte que tu as ressentie, note quelques heures après qu'elle soit redescendue :<br>— L'<strong>événement déclencheur</strong><br>— Ce que tu <strong>ressens</strong> (corps, pensées)<br>— Ce que tu <strong>fais</strong><br>— Les <strong>conséquences</strong><br><br>Refais cet exercice avec différentes émotions. Pointer ses émotions s'entraîne.<br><br><em>📖 Tout cela est approfondi dans le livret thérapeutique — n'hésite pas à le télécharger.</em>`, keys:['Alexithymie','Tableau des émotions','S\'entraîne'] },
+  { id:'accepter', day:'Fiche 6', title:"Accepter ses émotions", body:`L'acceptation, c'est <strong>accueillir totalement</strong> ce qu'on ressent, sans lutter contre ce qui est déjà là.<br><br><em>Accepter ≠ se résigner, abandonner, approuver.</em><br><br><strong>Paradoxalement, accepter ses émotions est le meilleur moyen de ne pas en être débordé.</strong><br><br>Plutôt que "je ne devrais pas souffrir, pourquoi ?", se dire : <em>"cette souffrance est là maintenant, je l'accueille"</em>.<br><br>Ça n'enlève pas la douleur — mais il coûte bien moins d'énergie de laisser passer une vague que de lutter contre elle.`, keys:['Acceptation ≠ résignation','Accueillir','Moins de souffrance'] },
+  { id:'pleine-conscience', day:'Fiche 7', title:"La pleine conscience", body:`La <strong>pleine conscience</strong>, c'est porter son attention sur le moment présent, <strong>sans jugement</strong>.<br><br>Quand le passé fait mal et que l'avenir fait peur, s'ancrer dans le présent est une excellente solution. C'est dur de lâcher prise — mais ça a d'excellents résultats.<br><br><strong>Le scanner corporel</strong> — passe en revue chaque partie du corps, de la tête aux orteils, comme un faisceau de lumière. Note juste ce que tu ressens. Lorsque tu passes une partie "à la lumière", essaie de relâcher cette partie consciemment.<br><br><strong>La cohérence cardiaque</strong> — 5 secondes d'inspire, 5 secondes d'expire, pendant 5 minutes, <strong>3 fois par jour</strong>. L'effet dure <strong>plusieurs heures</strong>.<br><br><em>💙 Tu peux utiliser les méditations guidées disponibles dans l'application, ou en trouver d'autres sur YouTube, Spotify, Petit Bambou et bien d'autres plateformes.</em>`, keys:['Présent sans jugement','Scanner corporel','Cohérence cardiaque 3×5×5'] },
+  { id:'distorsions', day:'Fiche 8', title:"Les distorsions cognitives", body:`Les distorsions cognitives, c'est comme un <strong>petit démon sur ton épaule</strong> qui te fait voir la situation du mauvais côté — en déformant la réalité sans que tu t'en rendes compte.<br><br>Quelques exemples :<br><br><strong>La pensée tout-ou-rien</strong> — <em>"J'ai raté ce truc, donc je suis complètement nul·le."</em> Rien n'est nuancé, tout est blanc ou noir.<br><br><strong>La lecture de pensée</strong> — <em>"Il ne m'a pas répondu, il doit me détester."</em> Tu crois savoir ce que l'autre pense, sans aucune preuve.<br><br><strong>Le raisonnement émotionnel</strong> — <em>"Je me sens inutile, donc je suis inutile."</em> Une émotion devient une vérité.<br><br>Il en existe bien d'autres — catastrophisation, surgénéralisation, personnalisation... <em>📖 Tu les retrouveras tous dans le livret.</em><br><br>La première étape : <strong>les repérer</strong>. Quand le démon parle, tu peux lui répondre.`, keys:['Petit démon','Exemples concrets','Les repérer'] },
+  { id:'ange-gardien', day:'Fiche 9', title:"L'ange gardien", body:`Face aux pensées négatives, imagine un <em>ange gardien</em> — une personne de confiance, réelle ou fictive, mais qui serait de bon conseil.<br><br>Que dirait-il dans cette situation ? Que te dirait ton meilleur ami si tu lui racontais ce que tu vis ?<br><br>Rappelle-toi : tu te parles souvent beaucoup plus durement qu'à quelqu'un que tu aimes. <strong>Essaie de te traiter avec la même douceur.</strong><br><br><em>Avec l'entraînement, l'ange parle plus fort que le démon.</em>`, keys:['Bienveillance envers soi','Réel ou fictif','L\'ange plus fort que le démon'] },
+  { id:'dissociation', day:'Fiche 10', title:"La dissociation et l'ancrage", body:`La <strong>dissociation</strong> survient souvent face à des émotions trop intenses. Ses formes :<br><br>— « Je suis hors de mon corps » (dépersonnalisation)<br>— « Je suis coupé·e du monde » (déréalisation)<br>— Émotions éteintes, mémoire bizarre<br><br>C'est un <strong>mécanisme de survie</strong>. Pas dangereux pour toi — mais très désagréable à vivre.<br><br>Pour revenir : il existe différentes techniques d'ancrage (5-4-3-2-1, mouvement, contact physique, eau froide…). <strong>Ces techniques doivent d'abord être travaillées dans ton état normal</strong>, hors de toute crise, pour être vraiment acquises. Comme un réflexe — ça ne s'improvise pas au moment où ça déborde.<br><br><em>Apprivoiser ces sensations progressivement aide à reprendre le contrôle quand ça compte vraiment.</em>`, keys:['Mécanisme de survie','Désagréable, pas dangereux','S\'entraîner hors des crises'] },
+  { id:'peur-abandon', day:'Fiche 11', title:"La peur de l'abandon", body:`Cette peur peut régir toutes tes relations. Quand les proches s'absentent, le vide peut devenir envahissant.<br><br><div style="background:#F7EDDA;border-radius:12px;padding:14px;margin:10px 0;font-size:13px;line-height:1.9;border-left:3px solid #B8893A;"><strong>🔄 Le cercle vicieux :</strong><br><br>😰 <strong>Peur de l'abandon</strong><br>↓<br>🔍 <strong>Hypersensibilité aux signaux de rejet</strong> <em>(un message sans réponse, un regard distrait…)</em><br>↓<br>💥 <strong>Crise</strong> <em>(comportements qui cherchent à retenir l'autre)</em><br>↓<br>💔 <strong>Abandon réel</strong> <em>(l'autre s'éloigne, épuisé)</em><br>↓<br>😰 <strong>Peur de l'abandon renforcée</strong><br>↓ ↻</div><br>Parfois on abandonne l'autre en premier — c'est plus facile que d'éprouver la peur qu'il nous laisse.<br><br><em>Cette peur n'est pas aussi simple en réalité — mais c'est une clé de compréhension importante.</em>`, keys:['Cercle vicieux','Peur → Crise → Abandon','Clé de compréhension'] },
+  { id:'ancrage-fiche', day:'Fiche 12', title:"Exemples d'ancrage", body:`L'ancrage sert à revenir dans le moment présent quand on se sent partir — en dissociation, en crise d'angoisse, ou quand les émotions débordent. <strong>Ces exercices se travaillent d'abord à froid, hors de toute crise.</strong><br><br><strong>🖐️ Le 5-4-3-2-1</strong><br>Nomme lentement autour de toi : <em>5 choses que tu vois, 4 sons que tu entends, 3 choses que tu peux toucher, 2 odeurs, 1 goût.</em> L'objectif : ramener l'attention sur le corps et le présent, couper le flux de pensées.<br><br><strong>💧 L'eau froide</strong><br>Passe tes mains sous l'eau froide, ou pose un glaçon dans ta main. La sensation physique intense et immédiate interrompt la spirale émotionnelle et fait revenir dans le corps.<br><br><em>Ces deux exercices simples peuvent faire une vraie différence — à condition de les avoir pratiqués avant la crise.</em>`, keys:['5-4-3-2-1','Eau froide','S\'entraîner à froid'] },
+  { id:'pennebaker', day:'Fiche 13', title:"Écrire et se confronter", body:`Une technique pour se confronter <strong>graduellement</strong> aux émotions difficiles :<br><br>1. Écris sur ce qui te préoccupe, sans censure<br>2. Évalue l'intensité sur 10<br>3. Répète <strong>quelques minutes par jour</strong>, pendant plusieurs jours<br>4. Relis les jours suivants — l'intensité devrait baisser<br><br><em>Tout ce qui est écrit semble moins impressionnant.</em><br><br>Aussi utile pour les <strong>angoisses flottantes</strong> dont on ne comprend pas la source.<br><br>Cet exercice a un triple but : <strong>décharger ses émotions</strong> sur le papier, <strong>pointer l'intensité</strong> de ce qu'on ressent, et <strong>se réexposer le lendemain à froid</strong> — pour se désensibiliser progressivement.`, keys:['Écriture libératrice','Triple but','Se désensibiliser'] },
+  { id:'communication', day:'Fiche 14', title:"Communiquer en situation de conflit", body:`Bien communiquer en situation de tension, ça demande de l'entraînement — et surtout de sentir <strong>quand la situation commence à se tendre</strong>, avant que ça déborde.<br><br>Méthode <strong>DESC</strong> pour exprimer sans déclencher :<br><br><strong>D</strong> — Décris les faits objectifs : <em>"Quand tu es rentré tard..."</em><br><strong>E</strong> — Exprime ton émotion en "je" : <em>"...je me suis senti·e inquiet·e..."</em><br><strong>S</strong> — Suggère une solution : <em>"...j'aimerais un message s'il y a du retard."</em><br><strong>C</strong> — Conclus positivement : <em>"Ça m'aiderait à me sentir en sécurité."</em><br><br>Ce qui crée le conflit, ce n'est pas l'émotion — c'est la façon dont on l'exprime.`, keys:['DESC','Sentir la tension tôt','Sans accusation'] },
+  { id:'proches', day:'Fiche 15', title:"Pour les proches : valider sans approuver", body:`<strong>Valider ≠ être d'accord.</strong> C'est reconnaître que l'émotion existe.<br><br>À dire : « Je vois que tu souffres », « Ce que tu ressens est compréhensible »<br>À éviter : « Tu exagères », « Calme-toi », « Ce n'est pas grave »<br><br><strong>Dans la crise, ne pas discuter logiquement.</strong> La peur et la logique ne s'accordent pas. Se retirer, attendre, puis reparler.<br><br>Valider désamorce <strong>beaucoup</strong> de crises.`, keys:['Valider ≠ approuver','Phrases qui aident','Beaucoup de crises désamorcées'] },
+  { id:'espoir', day:'Fiche 16', title:"Garder espoir", body:`Après 10 ans, environ <strong>85% des personnes diagnostiquées</strong> ne remplissent plus les critères du trouble.<br><br>Ça paraît long — mais c'est parce que les traits de personnalité s'éteignent progressivement, au fur et à mesure. Ce qu'il faut retenir, c'est que <strong>les gens se rétablissent.</strong><br><br>Les comportements impulsifs diminuent. Les relations deviennent plus stables. La vie s'améliore vraiment.<br><br><em>Il ne faut pas s'attendre à des changements immédiats. Changer prend du temps. Mais il ne faut pas perdre espoir.</em><br><br><strong>Tu n'es pas brisé·e. Tu es en chemin.</strong>`, keys:['85% à 10 ans','Les gens se rétablissent','En chemin'] },
+
+  { id:'emotions-secondaires', day:'Fiche 17', title:"Les émotions cachées derrière d'autres émotions", body:`Certaines émotions <strong>masquent d'autres émotions</strong> — on les appelle émotions secondaires.<br><br>Un exemple classique : une mère qui gronde son enfant parce qu'il a traversé la rue sans regarder. Elle exprime de la <strong>colère</strong>, mais ce qui est dessous, c'est de la <strong>peur</strong>.<br><br>Chez les personnes concernées par le trouble borderline, c'est très fréquent. La colère peut cacher de la tristesse, de la honte, ou de la peur de l'abandon. L'agressivité peut cacher une demande d'amour.<br><br>Pour identifier l'émotion cachée, demande-toi : <em>"Qu'est-ce que je ressentirais si je n'étais pas en colère ?"</em> La réponse est souvent plus proche de la vérité.`, keys:['Émotion cachée','Colère = peur ou tristesse','Creuser sous la surface'] },
+
+  { id:'honte', day:'Fiche 18', title:"La honte — l'émotion qui fait le plus de dégâts", body:`La <strong>honte</strong> est une émotion très représentée chez les personnes concernées par le trouble de la personnalité borderline, et l'une des plus destructrices.<br><br>Contrairement à la culpabilité (<em>"j'ai fait quelque chose de mal"</em>), la honte porte sur le soi entier : <em>"je suis quelqu'un de mauvais"</em>.<br><br>Elle alimente directement les comportements impulsifs, les scarifications, les crises. Certains parlent du trouble borderline comme d'<em>une réponse chronique à la honte</em>.<br><br><strong>Comment la réduire :</strong><br>— <strong>Savoir pointer cette honte</strong> et reconnaître que c'est souvent le trouble qui la génère aide à faire un pas de côté. Ça peut l'empêcher de prendre les commandes et de tout remettre en question.<br>— <strong>Nommer la honte à pleine voix</strong> peut la diminuer — lui donner un nom la rend moins envahissante.<br>— Partager avec quelqu'un de confiance la dédramatise<br>— Se demander : est-ce que mon meilleur·e ami·e aurait honte de la même chose à ma place ?`, keys:['Honte ≠ culpabilité','Pointer la honte','Nommer à pleine voix'] },
+
+  { id:'lieu-calme', day:'Fiche 19', title:"Créer son lieu calme intérieur", body:`Les images mentales ont un <strong>immense pouvoir</strong> sur nos émotions. On peut apprendre à créer un espace de sécurité dans sa tête.<br><br><strong>L'exercice :</strong><br>Ferme les yeux. Imagine un lieu où tu te sens parfaitement calme et en sécurité. Ça peut être une plage, une forêt, ta chambre, ou même un lieu imaginaire.<br><br>Visualise-le avec le plus de détails possibles. <em>Quelle lumière ? Quelle température ? Quels sons ? Quelles odeurs ?</em><br><br>Note-le ou dessine-le sur une feuille. À force de t'y projeter, ce lieu deviendra un outil disponible en quelques secondes, même en pleine crise.<br><br><em>Un lieu safe, c'est aussi une vraie adresse — un café, la maison d'un proche — à laquelle tu peux aller physiquement quand ça déborde.</em>`, keys:['Images mentales','Lieu imaginaire ou réel','À pratiquer hors des crises'] },
+
+  { id:'variation-humeur', day:'Fiche 20', title:"Comprendre les variations d'humeur", body:`L'humeur des personnes concernées par le trouble borderline est souvent vécue comme <strong>chaotique</strong> — une succession de vagues très fortes, difficiles à prévoir.<br><br>Un des biais cognitifs fréquents dans les moments compliqués, c'est la <strong>généralisation du négatif</strong> : ce biais a tendance à nous faire retenir en priorité les moments les plus bas d'une journée, et à décréter "mauvaise journée" en oubliant tout le reste.<br><br>Pour contrer ça : chaque soir, cherche <strong>3 choses qui t'ont rendu·e joyeux·se aujourd'hui</strong>. Même petites. Un café chaud, un message sympa, un moment de soleil.<br><br>Ce n'est pas de la pensée positive forcée. C'est recalibrer le filtre négatif automatique du cerveau.<br><br><strong>Essaie pendant 7 jours.</strong>`, keys:['Généralisation du négatif','3 bonnes choses par jour','Recalibrer le cerveau'] },
+
+  { id:'partager', day:'Fiche 21', title:"Partager ses émotions — à qui et comment", body:`La plupart des gens éprouvent le besoin de <strong>partager</strong> ce qu'ils vivent. Chez les personnes concernées par le trouble borderline, ce besoin est encore plus intense.<br><br>Partager a de vrais effets bénéfiques :<br>— Restaurer le sentiment d'appartenance<br>— Recevoir du soutien<br>— Voir les choses sous un nouvel angle<br>— Repousser les pensées négatives<br><br><strong>Mais :</strong> quand on est à fleur de peau, il faut bien choisir son interlocuteur. Une personne maladroite peut aggraver les choses — mais si elle est bienveillante, tu peux la guider.<br><br>Questions utiles avant de partager : <em>Cette personne est-elle disponible ? A-t-elle l'habitude de valider mes émotions ? Suis-je en état d'entendre une réponse inattendue ?</em>`, keys:['Partager = outil thérapeutique','Guider une personne bienveillante','Pas n\'importe quand'] },
+
+
+  { id:'troubles-associes', day:'Fiche 22', title:"Les troubles qui accompagnent souvent le trouble borderline", body:`Le <strong>trouble borderline</strong> voyage rarement seul. Quelques troubles fréquemment associés :<br><br><strong>Dépression</strong> — La tristesse dans le trouble borderline fluctue vite (heures/jours). Un épisode dépressif classique dure plus de 15 jours. Les deux peuvent coexister.<br><br><strong>Troubles du comportement alimentaire</strong> — Anorexie et boulimie sont fréquents. Parfois lié à la gestion des émotions : contrôle intense d'un côté, débordement de l'autre.<br><br><strong>Addictions</strong> — Plus fréquentes, souvent comme moyen de gérer la souffrance. Elles amplifient l'instabilité émotionnelle sur le long terme.<br><br><strong>Anxiété sociale</strong> — Les deux troubles se répondent et peuvent s'amplifier mutuellement : la peur du jugement renforce l'instabilité émotionnelle, et inversement.<br><br><strong>Traitements médicamenteux</strong> — Aucun médicament ne soigne vraiment le trouble borderline. Ils peuvent cependant aider à gérer certains symptômes ou troubles associés (anxiété, dépression, impulsivité).<br><br><em>Reconnaître ces troubles associés aide à mieux comprendre ce qu'on vit, sans se définir par eux.</em>`, keys:['Dépression','TCA','Addictions','Anxiété sociale','Médicaments'] },
+  { id:'urgence-agir', day:'Fiche 23', title:"L'urgence à agir", body:`Tu connais cette sensation : quelque chose se passe, et il faut réagir <em>maintenant</em>. Envoyer ce message, appeler cette personne, prendre cette décision. L'urgence semble réelle et totale.<br><br>Mais cette urgence est presque toujours <strong>émotionnelle, pas factuelle</strong>. Ce n'est pas la situation qui est urgente — c'est l'émotion qui est intense.<br><br>La différence est cruciale : une vraie urgence (danger immédiat, santé) mérite une action rapide. Une urgence émotionnelle, elle, a besoin de temps.<br><br><strong>Le vide intérieur crée une urgence particulière</strong> — le besoin de le combler immédiatement, avec n'importe quoi ou n'importe qui. Ce réflexe est compréhensible. Mais agir dessus précipitamment aggrave souvent les choses : l'autre se sent envahi, et le vide revient encore plus fort après.<br><br>Ce que tu peux faire :<br>— <strong>Nommer l'urgence</strong> : <em>"Je ressens une urgence à agir. Est-elle réelle ?"</em><br>— <strong>Attendre 15 minutes</strong> avant d'agir. Souvent, l'intensité baisse.<br>— <strong>Agir sur le corps plutôt que sur la situation</strong> : respirer, bouger, s'ancrer.<br><br><em>L'urgence émotionnelle ment sur l'heure qu'il est. Elle dit "maintenant" — mais la plupart du temps, ça peut attendre.</em>`, keys:['Urgence émotionnelle ≠ réelle','Vide et précipitation','Attendre 15 min'] },
+];
+
+const BASE_QUIZ = [
+  { context:"Tu as envoyé un message il y a 2 heures. Pas de réponse. La panique monte.", opts:[{text:"Tu envoies 5 messages pour vérifier",danger:"risky"},{text:"Tu reconnais ta peur de l'abandon et tu attends",danger:"helpful"},{text:"Tu romps par message pour partir avant",danger:"risky"},{text:"Tu te convaincs que c'est la fin",danger:"neutral"}], ans:1, exp:"Reconnaître ce qui se passe et attendre. La non-réponse a presque toujours une explication banale.", traits:['abandon'], distorsions:['catastrophisation'], competences:['pause'] },
+  { context:"Tu te disputes avec un proche. Tu commences à voir rouge.", opts:[{text:"Tu cries pour te faire entendre",danger:"risky"},{text:"Tu dis : « J'ai besoin de 20 min, on en reparle après »",danger:"helpful"},{text:"Tu encaisses en ruminant",danger:"risky"},{text:"Tu pars en claquant la porte",danger:"neutral"}], ans:1, exp:"Nommer son débordement et demander une pause structurée. Ça protège la relation.", traits:['hypersensibilite'], distorsions:['raisonnement_emotionnel'], competences:['pause'] },
+  { context:"Tu te réveilles avec un sentiment de vide. Tu ne sais pas pourquoi.", opts:[{text:"Rester au lit toute la journée",danger:"risky"},{text:"Faire un truc intense pour te sentir vivant·e",danger:"risky"},{text:"Te lever, manger, marcher — l'ancrage corporel",danger:"helpful"},{text:"Te forcer à être très productif·ve",danger:"neutral"}], ans:2, exp:"Le vide se traite par l'ancrage corporel, pas par l'intensité. Les activités fortes reviennent en rebond plus grand.", traits:['vide'], distorsions:['abstraction'], competences:['ancrage'] },
+  { context:"Un·e ami·e ne t'a pas invité·e. La rage monte.", opts:[{text:"Envoyer un message cinglant",danger:"risky"},{text:"Couper les ponts définitivement",danger:"risky"},{text:"Écrire dans tes notes, attendre 24h",danger:"helpful"},{text:"Accumuler le ressentiment",danger:"neutral"}], ans:2, exp:"La règle des 24h. 90% du temps, le lendemain on voit les choses différemment.", traits:['clivage'], distorsions:['personnalisation'], competences:['pause'] },
+  { context:"Tu viens de te faire du mal. La honte monte.", opts:[{text:"Te juger sévèrement",danger:"risky"},{text:"Tout cacher",danger:"risky"},{text:"Soigner physiquement, noter le déclencheur",danger:"helpful"},{text:"En parler à tout le monde",danger:"neutral"}], ans:2, exp:"Soigner d'abord, sans dramatiser. Identifier le déclencheur sert plus que de se flageller.", traits:['autoinvalidation'], distorsions:['etiquetage'], competences:['ange_gardien'] },
+  { context:"Tu viens de rencontrer quelqu'un. Tu as envie de tout lui donner.", opts:[{text:"Tout déballer dès le premier soir",danger:"risky"},{text:"Avancer petit à petit sur plusieurs semaines",danger:"helpful"},{text:"Ne rien dire par peur du rejet",danger:"neutral"},{text:"Lui proposer immédiatement de vivre ensemble",danger:"risky"}], ans:1, exp:"L'attachement intense et rapide débouche souvent sur des déceptions. Une intimité saine se construit dans la durée.", traits:['attachement'], distorsions:['raisonnement_emotionnel'], competences:['pause'] },
+  { context:"Tu es au niveau ROUGE. Quelle est la PIRE chose à faire ?", opts:[{text:"Essayer de comprendre pourquoi tu es comme ça",danger:"helpful"},{text:"Mettre la tête sous l'eau froide",danger:"risky"},{text:"Appeler quelqu'un",danger:"risky"},{text:"Sortir de l'endroit",danger:"risky"}], ans:0, exp:"Au rouge, on ne réfléchit pas. On agit sur le corps. Comprendre se fait APRÈS.", traits:['hypersensibilite'], distorsions:['raisonnement_emotionnel'], competences:['ancrage'] },
+  { context:"Quelqu'un te fait un compliment. Tu te dis automatiquement qu'il ne le pense pas.", opts:[{text:"Refuser le compliment et minimiser",danger:"risky"},{text:"Remarquer la distorsion, et juste dire « merci »",danger:"helpful"},{text:"Ressentir de la honte et changer de sujet",danger:"neutral"},{text:"Te dire que les autres sont naïfs",danger:"risky"}], ans:1, exp:"C'est le rejet du positif. Accepter un compliment, même inconfortablement, casse progressivement ce schéma.", traits:['autoinvalidation'], distorsions:['rejet_positif'], competences:['ange_gardien'] },
+  { context:"Tu te sens hors de ton corps, comme dans un film. Tu paniques.", opts:[{text:"Te dire que tu deviens fou·folle",danger:"risky"},{text:"Reconnaître la dissociation, faire un ancrage 5-4-3-2-1",danger:"helpful"},{text:"Continuer comme si de rien n'était",danger:"neutral"},{text:"Prendre des médicaments pour étouffer la sensation",danger:"risky"}], ans:1, exp:"La dissociation est un mécanisme de survie. Pas dangereuse. L'ancrage corporel la fait redescendre.", traits:['dissociation'], distorsions:['catastrophisation'], competences:['ancrage'] },
+  { context:"Ton·ta meilleur·e ami·e oublie ton anniversaire. Tu te dis : « notre amitié ne vaut rien ».", opts:[{text:"Bloquer sur tous les réseaux",danger:"risky"},{text:"Remarquer ce que tu fais : tu passes d'un oubli à un jugement total. Attendre avant de réagir.",danger:"helpful"},{text:"Envoyer un message accusateur",danger:"risky"},{text:"Ruminer sans rien dire",danger:"neutral"}], ans:1, exp:"Un oubli, même douloureux, ne dit rien sur la valeur d'une amitié. Le cerveau fait un raccourci entre un événement isolé et une conclusion définitive — c'est le clivage. Nommer ce mécanisme aide à ne pas en faire une vérité.", traits:['clivage'], distorsions:['dichotomique'], competences:['pause'] },
+
+  { context:"Tu cries sur quelqu'un que tu aimes. Une fois la crise passée, une honte énorme arrive.", opts:[{text:"Te dire que tu es une personne horrible et que tu ne mérites pas d'être aimé·e",danger:"risky"},{text:"T'excuser simplement, sans te flageller, et chercher ce qui a déclenché la crise",danger:"helpful"},{text:"Faire comme si rien ne s'était passé",danger:"neutral"},{text:"Promettre que ça n'arrivera plus jamais",danger:"risky"}], ans:1, exp:"La honte chronique prépare la prochaine crise. Une excuse sincère et brève suffit. L'important c'est d'identifier le déclencheur pour progresser — pas de se punir.", traits:['autoinvalidation','honte'], distorsions:['etiquetage','devrait'], competences:['ange_gardien','nommer'] },
+
+  { context:"Tu es à fleur de peau et tu as besoin de parler. Tu as envie d'appeler cinq personnes en même temps pour vider ton sac.", opts:[{text:"Appeler tout le monde d'un coup en rafale",danger:"risky"},{text:"Choisir une seule personne de confiance, disponible et bienveillante",danger:"helpful"},{text:"Ne parler à personne pour ne pas déranger",danger:"neutral"},{text:"Poster sur les réseaux sociaux",danger:"risky"}], ans:1, exp:"Partager ses émotions est thérapeutique — mais à la bonne personne. En état de débordement, on est particulièrement vulnérable à une réponse maladroite. Choisir un interlocuteur sûr fait toute la différence.", traits:['hypersensibilite','attachement'], distorsions:['raisonnement_emotionnel'], competences:['pause','nommer'] },
+
+  { context:"Tu viens de prendre une décision importante (rupture, démission) sous le coup d'une émotion très forte.", opts:[{text:"L'assumer complètement — c'était la bonne décision sur le moment",danger:"risky"},{text:"Mettre la décision en pause 48h avant de l'officialiser si c'est encore possible",danger:"helpful"},{text:"Te dire que tu es incapable de prendre des décisions",danger:"risky"},{text:"Demander à quelqu'un d'autre de décider à ta place",danger:"neutral"}], ans:1, exp:"Prendre une décision importante sous le coup d'une émotion intense est rarement la meilleure solution. Les 48h permettent de vérifier si, une fois l'émotion retombée, la décision tient encore.", traits:['impulsivite','hypersensibilite'], distorsions:['raisonnement_emotionnel'], competences:['pause','surf'] },
+
+  { context:"Tu remarques que depuis quelques jours tu te sens 'haut·e' — hyperactive, euphorique, avec plein de projets. Puis tu t'effondres sans comprendre pourquoi.", opts:[{text:"Profiter à fond des moments 'hauts' et subir les moments 'bas'",danger:"risky"},{text:"Reconnaître ce cycle de variation d'humeur, et en parler à ton thérapeute",danger:"helpful"},{text:"Te dire que c'est normal et que ça finira par s'arranger seul",danger:"neutral"},{text:"Prendre des médicaments sans prescription pour stabiliser",danger:"risky"}], ans:1, exp:"Les variations d'humeur intenses sont typiques du borderline. Les reconnaître comme un pattern — pas comme la réalité — aide à ne pas se laisser emporter par les creux ni à surinvestir dans les pics.", traits:['hypersensibilite','vide'], distorsions:['raisonnement_emotionnel','abstraction'], competences:['nommer','surf'] },
+
+  { context:"Tu ressens une colère intense envers un proche. En y regardant de plus près, tu te demandes si tu n'as pas surtout peur qu'il te laisse.", opts:[{text:"Exprimer la colère telle quelle — c'est ce que tu ressens",danger:"risky"},{text:"Prendre un moment pour creuser : colère ou peur ? Exprimer l'émotion vraie.",danger:"helpful"},{text:"Ne rien dire et avaler la colère",danger:"neutral"},{text:"Accuser le proche d'être la cause de tout",danger:"risky"}], ans:1, exp:"La colère est souvent une émotion secondaire qui masque la tristesse ou la peur. Quand on exprime l'émotion vraie ('j'ai peur que tu partes') plutôt que l'émotion secondaire ('tu m'énerves'), la relation en bénéficie.", traits:['abandon','hypersensibilite'], distorsions:['personnalisation'], competences:['nommer','surf'] },
+
+  { context:"Tu envoies un message affectueux à quelqu'un. Pas de réponse pendant 3 heures. Tu commences à te dire que tu as dû dire quelque chose de mal.", opts:[{text:"Réécrire pour te corriger ou t'excuser",danger:"risky"},{text:"Remarquer que tu interprètes un silence — et attendre",danger:"helpful"},{text:"Te convaincre que la relation est abîmée",danger:"risky"},{text:"Distraire ton attention avec autre chose en attendant",danger:"neutral"}], ans:1, exp:"Un silence n'est pas un message. Le cerveau borderline comble le vide avec les pires interprétations — mais un silence a rarement la signification qu'on lui donne.", traits:['abandon'], distorsions:['lecture_pensee','catastrophisation'], competences:['pause'] },
+
+  { context:"Tu as passé une bonne journée. Le soir, une petite remarque d'un proche te blesse. Tu te dis que toute la journée était nulle.", opts:[{text:"Aller te coucher en ruminant",danger:"risky"},{text:"Envoyer un message pour régler ça maintenant",danger:"risky"},{text:"Reconnaître le biais : un moment difficile n'efface pas le reste",danger:"helpful"},{text:"Ignorer la remarque complètement",danger:"neutral"}], ans:2, exp:"C'est la généralisation du négatif en action : un seul moment difficile prend toute la place. Nommer ce biais aide à remettre la journée dans sa vraie proportion.", traits:['hypersensibilite'], distorsions:['abstraction','dichotomique'], competences:['nommer'] },
+
+  { context:"Tu ressens une honte intense après une crise. Tu as envie de t'isoler complètement pendant plusieurs jours.", opts:[{text:"T'isoler totalement — les autres ne comprennent pas",danger:"risky"},{text:"Garder un contact minimal avec une personne de confiance, même court",danger:"helpful"},{text:"Faire semblant d'aller bien",danger:"neutral"},{text:"Revivre la crise en boucle pour comprendre",danger:"risky"}], ans:1, exp:"La honte pousse à l'isolement, et l'isolement renforce la honte. Un contact court et bienveillant — même un message — suffit à casser ce cercle.", traits:['honte','autoinvalidation'], distorsions:['etiquetage'], competences:['ange_gardien','nommer'] },
+
+  { context:"Ton thérapeute dit quelque chose qui te blesse en séance. Tu as envie de ne plus y retourner.", opts:[{text:"Annuler les prochaines séances sans explication",danger:"risky"},{text:"Faire comme si ça ne t'avait pas affecté",danger:"neutral"},{text:"Lui dire en séance que ça t'a blessé — c'est exactement le bon endroit",danger:"helpful"},{text:"Accuser le thérapeute d'être incompétent",danger:"risky"}], ans:2, exp:"Se sentir blessé par son thérapeute est fréquent — et précieux. C'est une occasion rare de travailler une réaction à chaud dans un cadre sécurisé. Le dire est plus courageux que partir.", traits:['abandon','clivage'], distorsions:['dichotomique'], competences:['communication'] },
+
+  { context:"Tu te retrouves seul·e un samedi soir. Le vide est envahissant. Tu as envie de contacter n'importe qui juste pour ne pas rester avec ce sentiment.", opts:[{text:"Envoyer des messages à plusieurs personnes en espérant une réponse rapide",danger:"risky"},{text:"Reconnaître le vide comme une sensation — pas une urgence — et faire un ancrage",danger:"helpful"},{text:"Scroller compulsivement sur les réseaux",danger:"risky"},{text:"Te lancer dans une activité physique ou créative",danger:"neutral"}], ans:1, exp:"Le vide crée une fausse urgence : combler maintenant, avec n'importe quoi. Mais agir dessus précipitamment aggrave souvent les choses. Reconnaître le vide comme une émotion à traverser — pas à fuir — est la première étape.", traits:['vide','impulsivite'], distorsions:['raisonnement_emotionnel'], competences:['ancrage','surf'], ficheId:'urgence-agir' },
+];
+
+const BASE_ENCOURAGEMENTS = [
+  { title: "C'est dur, mais tu tiens", file: "audio/encour-01.mp3" },
+  { title: "Tu te bats chaque jour", file: "audio/encour-02.mp3" },
+  { title: "La vague va passer", file: "audio/encour-03.mp3" },
+  { title: "Tu n'es pas la vague", file: "audio/encour-04.mp3" },
+  { title: "Tu as le droit d'être là", file: "audio/encour-05.mp3" },
+];
+
+const MEDITATIONS = [
+  { icon:"🌬️", title:"Cohérence cardiaque", duration:"35 sec", file:"audio/medit-01.mp3" },
+  { icon:"🏡", title:"Mon endroit sûr", duration:"48 sec", file:"audio/medit-02.mp3" },
+  { icon:"💛", title:"Répète après moi", duration:"19 sec", file:"audio/medit-03.mp3" },
+  { icon:"🖐️", title:"Ancrage corporel", duration:"1 min", file:"audio/medit-04.mp3" },
+  { icon:"🧭", title:"Revenir au présent", duration:"2 min", file:"audio/medit-05.mp3" },
+  { icon:"🌊", title:"Auto-compassion", duration:"3 min", file:"audio/medit-06.mp3" },
+];
+
+const DEFAULT_RED_ACTIONS = [
+  { icon:"🧊", title:"Eau glacée ou glaçon", desc:"Plonge ton visage dans l'eau froide ou tiens un glaçon serré" },
+  { icon:"📞", title:"Appelle quelqu'un", desc:"Une personne de confiance, le 3114, SOS Amitié" },
+  { icon:"🚪", title:"Change d'endroit — vers un lieu safe", desc:"Sors de la pièce ou de la maison. Va dans un endroit où tu te sens en sécurité : un café, une pharmacie, chez un voisin, un couloir commun. L'important : ne pas rester seul·e là où tu es." },
+  { icon:"💪", title:"Décharge ton corps", desc:"Cours sur place, frappe un coussin, crie dans une serviette" },
+  { icon:"🎧", title:"Écoute des encouragements", desc:"Une voix qui te rappelle que tu vas tenir" },
+];
+
+const RESSOURCES = {
+  livret:[
+    {title:"📖 Livret thérapeutique BorderBuddy",desc:"52 pages de psychoéducation DBT complète : comprendre le TPB, gérer les émotions, techniques d'ancrage, plan de crise. À lire, annoter et imprimer.",tags:["p","f"],file:"livret-borderbuddy.pdf"},
+  ],
+  associations:[
+    {title:"AFTPB",desc:"Groupes de parole, pair-aidance, orientation.",tags:["p","g"],url:"https://www.borderline-aftpb.com/"},
+    {title:"AFORPEL",desc:"Groupes en visio, annuaire de spécialistes.",tags:["p"],url:"https://www.aforpel.org/"},
+    {title:"AAPEL",desc:"Ressources en ligne, annuaire de thérapeutes.",tags:["p","a","g"],url:"https://aapel.org/"},
+    {title:"Connexions Familiales",desc:"Formation pour les proches.",tags:["f","a"],url:"https://proches-borderline.org/"},
+    {title:"La Maison Perchée",desc:"Soutien par les pairs.",tags:["p","a","g"],url:"https://lamaisonperchee.org/"},
+    {title:"UNAFAM",desc:"Soutien aux familles.",tags:["f","g"],url:"https://www.unafam.org/"},
+    {title:"🔍 Associations près de chez toi",desc:"Cherche sur Google : '[ta ville] + association borderline' ou '[ta région] + groupe de soutien TPB'. Beaucoup d'associations locales existent !<br><em>Exemple : Association Borderland à Lille — propose parfois des visios.</em>",tags:["p","g"]},
+  ],
+  lectures:[
+    {title:"Borderline — Cahier pratique",desc:"Ducasse & Brand-Arpon. La référence francophone.",tags:["p"]},
+    {title:"Le trouble borderline expliqué aux proches",desc:"Ducasse & Brand-Arpon.",tags:["f"]},
+    {title:"Les Borderlines",desc:"Granger & Karaklic. Petit ouvrage clair.",tags:["p","f"]},
+    {title:"Borderline… et heureuse !",desc:"Johanne Lavoie. Témoignage.",tags:["p","a"]},
+  ],
+  podcasts:[
+    {title:"border(line) le podcast",desc:"Agnès, concernée par le trouble.",tags:["p","f","g"],url:"https://podcast.ausha.co/border-line"},
+    {title:"GREMOHus — YouTube",desc:"Vidéos sur la thérapie dialectique DBT et l'accompagnement clinique.",tags:["p"],url:"https://www.youtube.com/c/GREMOHus"},
+    {title:"BorderAttitude",desc:"Lectures, vidéos, blog.",tags:["p","a","g"],url:"https://www.borderattitude.fr/"},
+    {title:"Mental — France TV Slash",desc:"Série animée gratuite.",tags:["a","g"],url:"https://www.france.tv/slash/"},
+  ],
+};
+
+const TRAITS={
+  abandon:{name:"Peur de l'abandon",desc:"Sensation panique d'être laissé·e, même sans signe réel.",ficheId:'peur-abandon'},
+  clivage:{name:"Clivage (tout/rien)",desc:"Voir les gens en tout bon ou tout mauvais.",ficheId:'distorsions'},
+  hypersensibilite:{name:"Hypersensibilité émotionnelle",desc:"Émotions vives, rapides, lentes à descendre.",ficheId:'ferrari'},
+  impulsivite:{name:"Impulsivité",desc:"Agir vite sous l'émotion, sans réfléchir.",ficheId:'vague-surf'},
+  vide:{name:"Sentiment de vide",desc:"Creux intérieur qu'on cherche à combler.",ficheId:'pointer-emotions'},
+  autoinvalidation:{name:"Auto-invalidation",desc:"Se reprocher ce qu'on ressent.",ficheId:'accepter'},
+  attachement:{name:"Attachement intense et rapide",desc:"S'investir vite et fort, déception souvent grande.",ficheId:'peur-abandon'},
+  dissociation:{name:"Dissociation",desc:"Sentiment d'être hors de son corps ou coupé du monde.",ficheId:'dissociation'},
+  honte:{name:"Honte intense",desc:"Sentiment d'être fondamentalement mauvais·e, pas seulement d'avoir mal agi. Alimente directement les comportements impulsifs.",ficheId:'honte'},
+};
+const DISTORSIONS={
+  catastrophisation:{name:"Catastrophisation",desc:"Imaginer le pire à partir d'un petit signe.",ficheId:'distorsions'},
+  lecture_pensee:{name:"Lecture de pensée",desc:"Croire savoir ce que pense l'autre.",ficheId:'distorsions'},
+  personnalisation:{name:"Personnalisation",desc:"Croire que tout est contre soi.",ficheId:'distorsions'},
+  raisonnement_emotionnel:{name:"Raisonnement émotionnel",desc:"Croire que ce qu'on ressent est la vérité.",ficheId:'distorsions'},
+  etiquetage:{name:"Étiquetage",desc:"Se coller une étiquette globale négative.",ficheId:'distorsions'},
+  dichotomique:{name:"Pensée tout/rien",desc:"Tout bon ou tout mauvais, sans nuances.",ficheId:'distorsions'},
+  abstraction:{name:"Abstraction sélective",desc:"Ne voir que les éléments négatifs.",ficheId:'distorsions'},
+  rejet_positif:{name:"Rejet du positif",desc:"Transformer le positif en négatif.",ficheId:'distorsions'},
+};
+const COMPETENCES={
+  pause:{name:"Marquer une pause avant d'agir",desc:"Attendre 15-20 min avant de réagir.",ficheId:'vague-surf'},
+  ancrage:{name:"S'ancrer dans le présent",desc:"5-4-3-2-1, sensations corporelles.",ficheId:'ancrage-fiche'},
+  ange_gardien:{name:"Invoquer l'ange gardien",desc:"Se parler comme à un·e ami·e.",ficheId:'ange-gardien'},
+  nommer:{name:"Nommer l'émotion",desc:"Identifier précisément l'émotion ressentie.",ficheId:'pointer-emotions'},
+  surf:{name:"Surfer la vague",desc:"Observer l'émotion sans la combattre.",ficheId:'vague-surf'},
+};
+
+// ══════════ STATE ══════════
+const ADMIN_PWD = 'admin1234';
+let currentFiche = 0;
+let quizIdx = 0;
+let quizAnswered = false;
+let quizScore = 0;
+let currentRes = 'associations';
+let medTimers = {};
+let mediaRecorder = null;
+let recordedChunks = [];
+let userRecordings = [];
+let selectedVoice = null;
+let userRedActions = null;
+let editMode = false;
+let currentAdminTab = 'fiches';
+
+// Storage helpers
+function getCustomFiches() { try{ return JSON.parse(localStorage.getItem('fil_custom_fiches')||'[]'); }catch(e){return[];} }
+function getCustomQuiz()   { try{ return JSON.parse(localStorage.getItem('fil_custom_quiz')||'[]');   }catch(e){return[];} }
+function getCustomEncour() { try{ return JSON.parse(localStorage.getItem('fil_custom_encour')||'[]');  }catch(e){return[];} }
+function getSettings()     { try{ return JSON.parse(localStorage.getItem('fil_settings')||'{}');       }catch(e){return{};} }
+
+function getAllFiches()  { return [...BASE_FICHES, ...getCustomFiches()]; }
+function getAllQuiz()    { return [...BASE_QUIZ, ...getCustomQuiz()]; }
+function getAllEncour()  {
+  const custom = getCustomEncour().map(e => typeof e === 'string' ? {title: e, text: e} : e);
+  return [...BASE_ENCOURAGEMENTS, ...custom];
+}
+
+// ══════════ NAV ══════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const map={'screen-home':'nav-home','screen-fiche':'nav-fiche','screen-quiz':'nav-quiz','screen-crisis':'nav-crisis','screen-res':'nav-res'};
+  if(map[id]) document.getElementById(map[id]).classList.add('active');
+  if(id==='screen-fiche') renderFiche();
+  if(id==='screen-quiz') { quizIdx=0; quizScore=0; quizAnswered=false; renderQuiz(); }
+  if(id==='screen-res') renderRes();
+}
+function goCrisis() { showScreen('screen-crisis'); backToTriage(); loadPlan(); loadRecordings(); loadRedActions(); }
+function showLevel(level) {
+  document.getElementById('crisis-triage').style.display='none';
+  document.querySelectorAll('.crisis-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('level-'+level).classList.add('active');
+  if(level==='encour'){ renderEncouragements(); }
+  if(level==='medit-crisis'){ renderMeditations('med-list-crisis'); }
+  if(level==='orange') renderMeditations('med-list-orange');
+  if(level==='red') renderRedActions();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function backToTriage() {
+  document.getElementById('crisis-triage').style.display='block';
+  document.querySelectorAll('.crisis-panel').forEach(p=>p.classList.remove('active'));
+  if(editMode) toggleEditMode();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ══════════ SWIPE TACTILE ══════════
+function initSwipe(elementId, onLeft, onRight) {
+  const el = document.getElementById(elementId);
+  if(!el) return;
+  let startX = 0;
+  el.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, {passive:true});
+  el.addEventListener('touchend', e => {
+    const diff = startX - e.changedTouches[0].clientX;
+    if(Math.abs(diff) > 50) {
+      if(diff > 0) onLeft();
+      else onRight();
+    }
+  }, {passive:true});
+}
+
+// ══════════ FICHES ══════════
+function renderFiche() {
+  const fiches = getAllFiches();
+  const f = fiches[currentFiche];
+  if(!f) return;
+
+  // Peupler le select
+  const sel = document.getElementById('fiche-select');
+  if(sel) {
+    sel.innerHTML = fiches.map((fi,i) => `<option value="${i}" ${i===currentFiche?'selected':''}>${fi.day} — ${fi.title}</option>`).join('');
+  }
+
+  document.getElementById('fiche-content').innerHTML = `
+    <div class="fiche-card" id="fiche-card-swipe">
+      <div class="fiche-card-deco"></div>
+      <div class="fiche-card-deco2"></div>
+      <div class="fiche-day">${f.day}</div>
+      <div class="fiche-title">${f.title}</div>
+      <div class="fiche-body">${f.body}</div>
+    </div>
+    <div class="fiche-key">
+      <div class="fiche-key-label">Points clés</div>
+      <div class="key-pills">${f.keys.map(k=>`<span class="key-pill">${k}</span>`).join('')}</div>
+    </div>
+  `;
+  document.getElementById('fiche-counter').textContent = `${currentFiche+1} / ${fiches.length}`;
+  initSwipe('fiche-card-swipe', nextFiche, prevFiche);
+}
+function jumpToFiche(idx) { currentFiche=parseInt(idx); renderFiche(); window.scrollTo({top:0,behavior:'smooth'}); }
+function nextFiche() { const f=getAllFiches(); if(currentFiche<f.length-1){currentFiche++;renderFiche();window.scrollTo({top:0,behavior:'smooth'});} }
+function prevFiche() { if(currentFiche>0){currentFiche--;renderFiche();window.scrollTo({top:0,behavior:'smooth'});} }
+
+function goToFiche(ficheId) {
+  closeModal();
+  const idx=getAllFiches().findIndex(f=>f.id===ficheId);
+  if(idx>=0){currentFiche=idx;showScreen('screen-fiche');}
+}
+
+// ══════════ QUIZ ══════════
+function renderQuiz() {
+  const allQ=getAllQuiz();
+  if(quizIdx>=allQ.length){renderQuizResult();return;}
+
+  // Peupler le select
+  const sel = document.getElementById('quiz-select');
+  if(sel) {
+    sel.innerHTML = allQ.map((q,i) => `<option value="${i}" ${i===quizIdx?'selected':''}>Situation ${i+1} — ${q.context.substring(0,40)}…</option>`).join('');
+  }
+
+  const q=allQ[quizIdx];
+  const pct=Math.round((quizIdx/allQ.length)*100);
+  document.getElementById('quiz-content').innerHTML=`
+    <div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:${pct}%"></div></div>
+    <div class="quiz-q"><div class="quiz-num">Situation ${quizIdx+1} / ${allQ.length}</div><p>${q.context}</p></div>
+    <div class="quiz-options">${q.opts.map((o,i)=>`<button class="quiz-opt" onclick="answerQuiz(${i})" id="opt-${i}">${o.text}</button>`).join('')}</div>
+    <div class="quiz-feedback" id="quiz-feedback"></div>
+    <div class="quiz-analysis" id="quiz-analysis" style="display:none;"></div>
+    <div class="quiz-next" id="quiz-next" style="display:none"><button onclick="nextQuiz()">Situation suivante →</button></div>
+  `;
+  quizAnswered=false;
+}
+function jumpToQuiz(idx) { quizIdx=parseInt(idx); quizAnswered=false; renderQuiz(); window.scrollTo({top:0,behavior:'smooth'}); }
+function answerQuiz(i) {
+  if(quizAnswered) return;
+  quizAnswered=true;
+  const q=getAllQuiz()[quizIdx];
+  const fb=document.getElementById('quiz-feedback');
+  document.querySelectorAll('.quiz-opt').forEach((b,idx)=>{
+    b.disabled=true;
+    if(q.opts[idx].danger==='helpful') b.classList.add('helpful');
+    if(q.opts[idx].danger==='risky')   b.classList.add('risky');
+  });
+  if(i===q.ans){fb.className='quiz-feedback show ok';fb.innerHTML='<strong>✓ Bonne stratégie !</strong><br>'+q.exp;quizScore++;}
+  else if(q.opts[i].danger==='risky'){fb.className='quiz-feedback show ko';fb.innerHTML='<strong>⚠️ Cette option peut empirer les choses.</strong><br>'+q.exp;}
+  else{fb.className='quiz-feedback show info';fb.innerHTML='<strong>Pas le meilleur choix.</strong><br>'+q.exp;}
+
+  let html='';
+  if(q.traits&&q.traits.length>0) html+=`<div class="analysis-card"><div class="analysis-cat ac-trait">🎯 Trait(s) borderline activé(s)</div>${q.traits.map(t=>`<div class="analysis-item"><span class="analysis-title">${TRAITS[t]?TRAITS[t].name:t}</span>${TRAITS[t]?`<span class="alink" onclick="showInfo('trait','${t}')">en savoir plus →</span>`:''}</div>`).join('')}</div>`;
+  if(q.distorsions&&q.distorsions.length>0) html+=`<div class="analysis-card"><div class="analysis-cat ac-dist">🧠 Distorsion(s) cognitive(s)</div>${q.distorsions.map(d=>`<div class="analysis-item"><span class="analysis-title">${DISTORSIONS[d]?DISTORSIONS[d].name:d}</span>${DISTORSIONS[d]?`<span class="alink" onclick="showInfo('distorsion','${d}')">en savoir plus →</span>`:''}</div>`).join('')}</div>`;
+  if(q.competences&&q.competences.length>0) html+=`<div class="analysis-card"><div class="analysis-cat ac-skill">🛠️ Compétence(s) à mettre en place</div>${q.competences.map(c=>`<div class="analysis-item"><span class="analysis-title">${COMPETENCES[c]?COMPETENCES[c].name:c}</span>${COMPETENCES[c]?`<span class="alink" onclick="showInfo('competence','${c}')">en savoir plus →</span>`:''}</div>`).join('')}</div>`;
+  if(q.ficheId) html+=`<div class="analysis-card" style="background:var(--sage-l);border:1px solid var(--sage-m);cursor:pointer;" onclick="goToFiche('${q.ficheId}')"><div class="analysis-cat ac-trait" style="background:var(--sage);color:white;">📋 Fiche liée</div><div class="analysis-item"><span class="analysis-title">${getAllFiches().find(f=>f.id===q.ficheId)?.title||q.ficheId}</span><span class="alink">Lire la fiche →</span></div></div>`;
+
+  const ae=document.getElementById('quiz-analysis');
+  ae.innerHTML=html; ae.style.display=html?'flex':'none';
+  document.getElementById('quiz-next').style.display='block';
+}
+function nextQuiz(){quizIdx++;renderQuiz();window.scrollTo({top:0,behavior:'smooth'});}
+function renderQuizResult(){
+  const n=getAllQuiz().length;
+  const pct=Math.round((quizScore/n)*100);
+  const msg=pct>=75?"Tu as bien intégré les stratégies.":pct>=50?"Tu commences à reconnaître les bons réflexes.":"Refais-le quand tu veux — chaque passage t'aide.";
+  document.getElementById('quiz-content').innerHTML=`<div class="quiz-result"><div class="quiz-score">${quizScore}/${n}</div><p>${msg}</p><button onclick="resetQuiz()">Recommencer</button></div>`;
+}
+function resetQuiz(){quizIdx=0;quizScore=0;quizAnswered=false;renderQuiz();}
+
+function showInfo(type,key){
+  const sources={trait:TRAITS,distorsion:DISTORSIONS,competence:COMPETENCES};
+  const labels={trait:'Trait borderline',distorsion:'Distorsion cognitive',competence:'Compétence'};
+  const item=sources[type][key];
+  if(!item) return;
+  let html=`<div class="modal-eyebrow">${labels[type]}</div><h3>${item.name}</h3><p>${item.desc}</p>`;
+  if(item.ficheId) html+=`<button class="modal-fiche-btn" onclick="goToFiche('${item.ficheId}')">📖 Voir la fiche →</button>`;
+  document.getElementById('modal-body').innerHTML=html;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('show');}
+document.addEventListener('click',e=>{if(e.target.id==='modal-overlay')closeModal();});
+
+// ══════════ RED ACTIONS ══════════
+function loadRedActions(){try{const s=localStorage.getItem('fil_red_actions');userRedActions=s?JSON.parse(s):null;}catch(e){userRedActions=null;}}
+function getCurrentActions(){return userRedActions||JSON.parse(JSON.stringify(DEFAULT_RED_ACTIONS));}
+function renderRedActions(){
+  const actions=getCurrentActions();
+  const list=document.getElementById('red-actions-list');
+  if(editMode){
+    list.innerHTML=actions.map((a,i)=>`
+      <div class="red-action edit-mode">
+        <div class="red-num">${i+1}</div>
+        <div class="edit-fields">
+          <input value="${esc(a.icon)}" placeholder="Emoji" maxlength="4" oninput="updateAction(${i},'icon',this.value)">
+          <input value="${esc(a.title)}" placeholder="Titre" oninput="updateAction(${i},'title',this.value)">
+          <input value="${esc(a.desc)}" placeholder="Description" oninput="updateAction(${i},'desc',this.value)">
+        </div>
+        <div class="red-ctrls">
+          ${i>0?`<button class="ctrl-btn" onclick="moveAction(${i},-1)">↑</button>`:''}
+          ${i<actions.length-1?`<button class="ctrl-btn" onclick="moveAction(${i},1)">↓</button>`:''}
+          <button class="ctrl-btn del" onclick="removeAction(${i})">×</button>
+        </div>
+      </div>`).join('');
+    document.getElementById('add-action-btn').style.display='block';
+    document.getElementById('edit-actions-bar').style.display='flex';
+  } else {
+    list.innerHTML=actions.map((a,i)=>`
+      <div class="red-action">
+        <div class="red-num">${i+1}</div>
+        <div class="red-icon">${a.icon}</div>
+        <div class="red-txt"><strong>${esc(a.title)}</strong><span>${esc(a.desc)}</span></div>
+      </div>`).join('');
+    document.getElementById('add-action-btn').style.display='none';
+    document.getElementById('edit-actions-bar').style.display='none';
+  }
+}
+function esc(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+function toggleEditMode(){editMode=!editMode;if(!userRedActions&&editMode)userRedActions=JSON.parse(JSON.stringify(DEFAULT_RED_ACTIONS));document.getElementById('edit-mode-label').textContent=editMode?'Vue normale':'Personnaliser';renderRedActions();}
+function updateAction(i,field,val){if(!userRedActions)userRedActions=JSON.parse(JSON.stringify(DEFAULT_RED_ACTIONS));userRedActions[i][field]=val;}
+function moveAction(i,dir){if(!userRedActions)userRedActions=JSON.parse(JSON.stringify(DEFAULT_RED_ACTIONS));const n=i+dir;if(n<0||n>=userRedActions.length)return;[userRedActions[i],userRedActions[n]]=[userRedActions[n],userRedActions[i]];renderRedActions();}
+function removeAction(i){if(!confirm('Supprimer ?'))return;if(!userRedActions)userRedActions=JSON.parse(JSON.stringify(DEFAULT_RED_ACTIONS));userRedActions.splice(i,1);renderRedActions();}
+function addAction(){if(!userRedActions)userRedActions=JSON.parse(JSON.stringify(DEFAULT_RED_ACTIONS));userRedActions.push({icon:"✨",title:"Nouvelle action",desc:"Décris-la ici"});renderRedActions();}
+function saveActions(){try{localStorage.setItem('fil_red_actions',JSON.stringify(userRedActions));}catch(e){}toggleEditMode();}
+function resetActions(){if(!confirm('Réinitialiser ?'))return;userRedActions=null;try{localStorage.removeItem('fil_red_actions');}catch(e){}renderRedActions();}
+
+// ══════════ PLAN ══════════
+function savePlan(){const p={vulnerabilite:document.getElementById('pf-vulnerabilite').value,signaux:document.getElementById('pf-signaux').value,aide:document.getElementById('pf-aide').value,contacts:document.getElementById('pf-contacts').value,phrase:document.getElementById('pf-phrase').value};try{localStorage.setItem('fil_plan',JSON.stringify(p));}catch(e){}const m=document.getElementById('plan-saved-msg');m.style.display='block';setTimeout(()=>m.style.display='none',3000);}
+function loadPlan(){try{const s=localStorage.getItem('fil_plan');if(!s)return;const p=JSON.parse(s);if(document.getElementById('pf-signaux')){document.getElementById('pf-vulnerabilite').value=p.vulnerabilite||'';document.getElementById('pf-signaux').value=p.signaux||'';document.getElementById('pf-aide').value=p.aide||'';document.getElementById('pf-contacts').value=p.contacts||'';document.getElementById('pf-phrase').value=p.phrase||'';}}catch(e){}}
+
+// ══════════ VOIX ══════════
+function populateVoices(){const sel=document.getElementById('voice-select');if(!sel)return;const vs=window.speechSynthesis.getVoices().filter(v=>v.lang.startsWith('fr'));if(!vs.length){sel.innerHTML='<option>Aucune voix française</option>';return;}const s=[...vs].sort((a,b)=>{const aF=/audrey|amelie|aurelie|virginie|julie|marie|female/i.test(a.name);const bF=/audrey|amelie|aurelie|virginie|julie|marie|female/i.test(b.name);return bF-aF;});sel.innerHTML=s.map((v,i)=>`<option value="${i}">${v.name}</option>`).join('');selectedVoice=s[0];sel.onchange=e=>{selectedVoice=s[parseInt(e.target.value)];};}
+// ══════════ LECTURE AUDIO MP3 ══════════
+let currentAudio = null;
+let currentPlayBtn = null;
+
+function playAudio(file, label, btn) {
+  // Si on reclique sur le même bouton → pause/reprise
+  if(currentAudio && currentPlayBtn === btn) {
+    if(currentAudio.paused) {
+      currentAudio.play();
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+      showAudio('🔊 ' + label);
+    } else {
+      currentAudio.pause();
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+      showAudio('⏸ ' + label);
+    }
+    return;
+  }
+  // Sinon on arrête l'audio en cours et on en lance un nouveau
+  stopCurrentAudio();
+  currentAudio = new Audio(file);
+  currentPlayBtn = btn;
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+  showAudio('🔊 ' + label);
+  currentAudio.play().catch(() => alert('Fichier audio introuvable. Vérifiez que le dossier audio/ est bien présent.'));
+  currentAudio.onended = () => {
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+    hideAudio();
+    currentAudio = null;
+    currentPlayBtn = null;
+  };
+}
+
+function stopCurrentAudio() {
+  if(currentAudio) { currentAudio.pause(); currentAudio = null; }
+  if(currentPlayBtn) {
+    currentPlayBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+    currentPlayBtn = null;
+  }
+  hideAudio();
+}
+
+function speakText(i, type, btn) {
+  if(type === 'encour') {
+    const e = getAllEncour()[i];
+    if(e.file) { playAudio(e.file, e.title, btn); return; }
+  } else {
+    const m = MEDITATIONS[i];
+    if(m.file) { playAudio(m.file, m.title, btn); return; }
+  }
+}
+
+function showAudio(m){const e=document.getElementById('audio-status');e.textContent=m;e.style.display='block';}
+function hideAudio(){document.getElementById('audio-status').style.display='none';}
+
+// ══════════ ENCOURAGEMENTS ══════════
+function renderEncouragements(){
+  document.getElementById('encour-list').innerHTML=getAllEncour().map((e,i)=>`
+    <div class="encour-card">
+      <button class="encour-play" onclick="speakText(${i},'encour',this)"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+      <div class="encour-text">${esc(e.title || e)}</div>
+    </div>`).join('');
+}
+
+// ══════════ ENREGISTREMENT ══════════
+async function startRecording(){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRecorder=new MediaRecorder(stream);
+    recordedChunks=[];
+    mediaRecorder.ondataavailable=e=>{if(e.data.size>0)recordedChunks.push(e.data);};
+    mediaRecorder.onstop=()=>{
+      const blob=new Blob(recordedChunks,{type:'audio/webm'});
+      const reader=new FileReader();
+      reader.onload=e=>{
+        const name=prompt('Nom de cet enregistrement ?','Message '+(userRecordings.length+1));
+        if(name){userRecordings.push({name,data:e.target.result});saveRecs();renderRecs();}
+      };
+      reader.readAsDataURL(blob);
+      stream.getTracks().forEach(t=>t.stop());
+      document.getElementById('record-btn').style.display='';
+      document.getElementById('record-pause-btn').style.display='none';
+      document.getElementById('record-stop-btn').style.display='none';
+      document.getElementById('record-status').textContent='';
+    };
+    mediaRecorder.start();
+    document.getElementById('record-btn').style.display='none';
+    document.getElementById('record-pause-btn').style.display='';
+    document.getElementById('record-stop-btn').style.display='';
+    document.getElementById('record-status').textContent='🔴 Enregistrement en cours…';
+  }catch(err){alert('Impossible d\'accéder au micro.');}
+}
+function pauseRecording(){
+  if(!mediaRecorder) return;
+  const btn=document.getElementById('record-pause-btn');
+  const status=document.getElementById('record-status');
+  if(mediaRecorder.state==='recording'){
+    mediaRecorder.pause();
+    btn.textContent='▶ Reprendre';
+    btn.style.background='var(--sage-l)';
+    btn.style.borderColor='var(--sage)';
+    btn.style.color='var(--sage-d)';
+    status.textContent='⏸ En pause';
+  } else if(mediaRecorder.state==='paused'){
+    mediaRecorder.resume();
+    btn.innerHTML='⏸ Pause';
+    btn.style.background='var(--gold-l)';
+    btn.style.borderColor='var(--gold)';
+    btn.style.color='var(--gold)';
+    status.textContent='🔴 Enregistrement en cours…';
+  }
+}
+function stopRecording(){
+  if(mediaRecorder && mediaRecorder.state!=='inactive') mediaRecorder.stop();
+}
+function saveRecs(){try{localStorage.setItem('fil_recordings',JSON.stringify(userRecordings));}catch(e){}}
+function loadRecordings(){try{const s=localStorage.getItem('fil_recordings');if(s){userRecordings=JSON.parse(s);renderRecs();}}catch(e){}}
+function renderRecs(){const l=document.getElementById('recordings-list');if(!l)return;if(!userRecordings.length){l.innerHTML='<p style="text-align:center;color:var(--muted);font-size:12.5px;padding:10px;">Aucun enregistrement.</p>';return;}l.innerHTML=userRecordings.map((r,i)=>`<div class="rec-item"><button class="rec-play" onclick="playRec(${i})"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></button><div class="rec-name">${esc(r.name)}</div><button class="rec-del" onclick="delRec(${i})">×</button></div>`).join('');}
+function playRec(i){const a=new Audio(userRecordings[i].data);a.play();showAudio('🔊 Lecture…');a.onended=()=>hideAudio();}
+function delRec(i){if(confirm('Supprimer ?')){userRecordings.splice(i,1);saveRecs();renderRecs();}}
+
+// ══════════ MÉDITATIONS ══════════
+function renderMeditations(tid){
+  const t=document.getElementById(tid);if(!t)return;
+  t.innerHTML=MEDITATIONS.map((m,i)=>`
+    <div class="med-card">
+      <div class="med-header">
+        <div class="med-icon">${m.icon}</div>
+        <div class="med-info"><strong>${m.title}</strong><span>${m.duration}</span></div>
+        <button class="med-play" onclick="speakText(${i},'med',this)"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+      </div>
+    </div>`).join('') + `
+  <div style="margin-top:18px;padding:14px;background:var(--sage-l);border-radius:12px;border-left:3px solid var(--sage);">
+    <p style="font-size:13px;color:var(--sage-d);line-height:1.7;">
+      💡 Il existe énormément d'autres enregistrements et vidéos guidées sur <strong>YouTube</strong>, <strong>Spotify</strong> ou des applications spécialisées comme <strong>Petit Bambou</strong> ou <strong>Insight Timer</strong>. N'hésite pas à aller explorer !
+    </p>
+  </div>`;
+}
+function toggleMed(tid,i){const b=document.getElementById(`mb-${tid}-${i}`);if(b)b.classList.toggle('open');}
+function fmt(s){const m=Math.floor(s/60),sc=s%60;return`${m}:${sc.toString().padStart(2,'0')}`;}
+function startTimer(tid,i){const k=`${tid}-${i}`;if(medTimers[k]){clearInterval(medTimers[k]);delete medTimers[k];}let r=MEDITATIONS[i].seconds;const fill=document.getElementById(`mf-${tid}-${i}`);const time=document.getElementById(`mt-${tid}-${i}`);const tot=MEDITATIONS[i].seconds;medTimers[k]=setInterval(()=>{r--;fill.style.width=((tot-r)/tot*100)+'%';time.textContent=fmt(r);if(r<=0){clearInterval(medTimers[k]);delete medTimers[k];time.textContent='✓ Fini';}},1000);}
+
+// ══════════ RESSOURCES ══════════
+const RL={livret:'📖 Livret',associations:'Associations',lectures:'Lectures',podcasts:'Podcasts & vidéos'};
+const TL={p:'Patients',f:'Proches',a:'Ados',g:'Gratuit',pro:'Pros'};
+const TC={p:'rt-p',f:'rt-f',a:'rt-a',g:'rt-g',pro:'rt-p'};
+function renderRes(){
+  document.getElementById('res-tabs').innerHTML=Object.keys(RESSOURCES).map(k=>`<button class="res-tab ${k===currentRes?'active':''}" onclick="switchRes('${k}')">${RL[k]}</button>`).join('');
+  document.getElementById('res-list').innerHTML=RESSOURCES[currentRes].map(r=>`<div class="res-card"><div class="res-card-title">${r.title}</div><div class="res-card-desc">${r.desc}</div><div class="res-tags">${r.tags.map(t=>`<span class="res-tag ${TC[t]||'rt-g'}">${TL[t]||t}</span>`).join('')}</div>${r.file?`<a href="${r.file}" download style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 14px;background:var(--sage);color:white;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">📥 Télécharger le livret</a>`:r.url?`<a href="${r.url}" target="_blank">Visiter →</a>`:''}</div>`).join('');
+}
+function switchRes(k){currentRes=k;renderRes();}
+
+// ══════════ INFO / DISCLAIMER ══════════
+function openInfo(){
+  const seen = localStorage.getItem('bb-info-seen');
+  document.getElementById('info-overlay').classList.add('show');
+  if(!seen) localStorage.setItem('bb-info-seen','1');
+}
+function closeInfo(){document.getElementById('info-overlay').classList.remove('show');}
+function openCrisisInfo(){document.getElementById('crisis-info-overlay').classList.add('show');}
+function closeCrisisInfo(){document.getElementById('crisis-info-overlay').classList.remove('show');}
+
+// Afficher le disclaimer automatiquement à la première visite
+window.addEventListener('load',()=>{
+  if(!localStorage.getItem('bb-info-seen')){
+    setTimeout(()=>document.getElementById('info-overlay').classList.add('show'), 600);
+  }
+});
+
+// ══════════ ADMIN — MOT DE PASSE ══════════
+function openAdminPwd(){document.getElementById('pwd-overlay').classList.add('show');document.getElementById('pwd-input').value='';document.getElementById('pwd-error').style.display='none';setTimeout(()=>document.getElementById('pwd-input').focus(),100);}
+function closePwd(){document.getElementById('pwd-overlay').classList.remove('show');}
+function checkPwd(){if(document.getElementById('pwd-input').value===ADMIN_PWD){closePwd();openAdmin();}else{document.getElementById('pwd-error').style.display='block';document.getElementById('pwd-input').value='';}}
+
+// ══════════ ADMIN — PANNEAU ══════════
+function openAdmin(){
+  document.getElementById('admin-overlay').classList.add('show');
+  renderAdminFiches(); renderAdminQuiz(); renderAdminEncour(); loadAdminSettings();
+}
+function closeAdmin(){document.getElementById('admin-overlay').classList.remove('show');}
+function switchAdminTab(t){
+  currentAdminTab=t;
+  document.querySelectorAll('.admin-tab').forEach((b,i)=>{b.classList.toggle('active',['fiches','quiz','encour','settings'][i]===t);});
+  document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('admin-'+t).classList.add('active');
+}
+
+function renderAdminFiches(){
+  const custom=getCustomFiches();
+  document.getElementById('fiche-count').textContent=BASE_FICHES.length+custom.length;
+  document.getElementById('admin-fiche-list').innerHTML=custom.length?custom.map((f,i)=>`
+    <div class="admin-item">
+      <div class="admin-item-info">
+        <div class="admin-item-title">${esc(f.title)}</div>
+        <div class="admin-item-sub">${esc(f.day)}</div>
+      </div>
+      <span class="admin-item-tag">Personnalisée</span>
+      <button class="admin-item-del" onclick="delCustomFiche(${i})">×</button>
+    </div>`).join(''):'<p style="font-size:13px;color:var(--muted);padding:8px 0;">Aucune fiche personnalisée pour l\'instant.</p>';
+}
+function addFiche(){
+  const day=document.getElementById('af-day').value.trim();
+  const title=document.getElementById('af-title').value.trim();
+  const body=document.getElementById('af-body').value.trim();
+  const keysRaw=document.getElementById('af-keys').value.trim();
+  if(!title||!body){alert('Titre et contenu requis.');return;}
+  const keys=keysRaw?keysRaw.split(',').map(k=>k.trim()).filter(Boolean):['Nouvelle fiche'];
+  const custom=getCustomFiches();
+  custom.push({id:'custom-'+Date.now(),day:day||`Fiche ${BASE_FICHES.length+custom.length+1}`,title,body,keys});
+  try{localStorage.setItem('fil_custom_fiches',JSON.stringify(custom));}catch(e){}
+  document.getElementById('af-day').value='';
+  document.getElementById('af-title').value='';
+  document.getElementById('af-body').value='';
+  document.getElementById('af-keys').value='';
+  flashMsg('fiche-save-msg');
+  renderAdminFiches();
+}
+function delCustomFiche(i){if(!confirm('Supprimer cette fiche ?'))return;const c=getCustomFiches();c.splice(i,1);try{localStorage.setItem('fil_custom_fiches',JSON.stringify(c));}catch(e){}renderAdminFiches();if(currentFiche>=getAllFiches().length)currentFiche=0;}
+
+function renderAdminQuiz(){
+  const custom=getCustomQuiz();
+  document.getElementById('quiz-count').textContent=BASE_QUIZ.length+custom.length;
+  document.getElementById('admin-quiz-list').innerHTML=custom.length?custom.map((q,i)=>`
+    <div class="admin-item">
+      <div class="admin-item-info">
+        <div class="admin-item-title">${esc(q.context.substring(0,60))}${q.context.length>60?'…':''}</div>
+        <div class="admin-item-sub">${q.opts.length} options</div>
+      </div>
+      <span class="admin-item-tag">Personnalisée</span>
+      <button class="admin-item-del" onclick="delCustomQuiz(${i})">×</button>
+    </div>`).join(''):'<p style="font-size:13px;color:var(--muted);padding:8px 0;">Aucune situation personnalisée.</p>';
+}
+function addQuiz(){
+  const ctx=document.getElementById('aq-context').value.trim();
+  const o0=document.getElementById('aq-opt0').value.trim();
+  const o1=document.getElementById('aq-opt1').value.trim();
+  const o2=document.getElementById('aq-opt2').value.trim();
+  const o3=document.getElementById('aq-opt3').value.trim();
+  const exp=document.getElementById('aq-exp').value.trim();
+  if(!ctx||!o0||!o1){alert('Situation, option 1 et 2 requises.');return;}
+  const opts=[{text:o0,danger:'helpful'},{text:o1,danger:'risky'},{text:o2||'Autre option',danger:'risky'}];
+  if(o3) opts.push({text:o3,danger:'neutral'});
+  const custom=getCustomQuiz();
+  custom.push({context:ctx,opts,ans:0,exp:exp||'La première option est la meilleure stratégie.',traits:[],distorsions:[],competences:[]});
+  try{localStorage.setItem('fil_custom_quiz',JSON.stringify(custom));}catch(e){}
+  ['aq-context','aq-opt0','aq-opt1','aq-opt2','aq-opt3','aq-exp'].forEach(id=>document.getElementById(id).value='');
+  flashMsg('quiz-save-msg'); renderAdminQuiz();
+}
+function delCustomQuiz(i){if(!confirm('Supprimer ?'))return;const c=getCustomQuiz();c.splice(i,1);try{localStorage.setItem('fil_custom_quiz',JSON.stringify(c));}catch(e){}renderAdminQuiz();}
+
+function renderAdminEncour(){
+  const custom=getCustomEncour();
+  document.getElementById('encour-count').textContent=BASE_ENCOURAGEMENTS.length+custom.length;
+  document.getElementById('admin-encour-list').innerHTML=custom.length?custom.map((e,i)=>`
+    <div class="admin-item">
+      <div class="admin-item-info"><div class="admin-item-title">"${esc(e)}"</div></div>
+      <span class="admin-item-tag">Personnalisée</span>
+      <button class="admin-item-del" onclick="delCustomEncour(${i})">×</button>
+    </div>`).join(''):'<p style="font-size:13px;color:var(--muted);padding:8px 0;">Aucune phrase personnalisée.</p>';
+}
+function addEncour(){
+  const txt=document.getElementById('ae-text').value.trim();
+  if(!txt){alert('Phrase requise.');return;}
+  const custom=getCustomEncour();
+  custom.push(txt);
+  try{localStorage.setItem('fil_custom_encour',JSON.stringify(custom));}catch(e){}
+  document.getElementById('ae-text').value='';
+  flashMsg('encour-save-msg'); renderAdminEncour();
+}
+function delCustomEncour(i){if(!confirm('Supprimer ?'))return;const c=getCustomEncour();c.splice(i,1);try{localStorage.setItem('fil_custom_encour',JSON.stringify(c));}catch(e){}renderAdminEncour();}
+
+function loadAdminSettings(){const s=getSettings();document.getElementById('as-quote').value=s.quote||'On ne peut pas arrêter les vagues, mais on peut apprendre à les surfer.';document.getElementById('as-author').value=s.author||'Jon Kabat-Zinn';}
+function saveSettings(){const q=document.getElementById('as-quote').value.trim();const a=document.getElementById('as-author').value.trim();const s={quote:q||'',author:a||''};try{localStorage.setItem('fil_settings',JSON.stringify(s));}catch(e){}applySettings();flashMsg('settings-save-msg');}
+function applySettings(){const s=getSettings();if(s.quote)document.getElementById('home-quote-text').textContent=s.quote;}
+function resetAllAdmin(){if(!confirm('Supprimer tout le contenu personnalisé ? (Les données de base restent.)'))return;['fil_custom_fiches','fil_custom_quiz','fil_custom_encour'].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});renderAdminFiches();renderAdminQuiz();renderAdminEncour();alert('Contenu personnalisé supprimé.');}
+
+function flashMsg(id){const el=document.getElementById(id);el.style.display='block';setTimeout(()=>el.style.display='none',3000);}
+
+// ══════════ CARROUSEL DE CITATIONS ══════════
+const QUOTES = [
+  { text: "On ne peut pas arrêter les vagues, mais on peut apprendre à les surfer.", author: "Jon Kabat-Zinn" },
+  { text: "L'inquiétude n'efface pas les chagrins de demain, elle éclipse toujours la joie du moment présent.", author: "Proverbe" },
+  { text: "La force ne vient pas de ce que tu peux faire. Elle vient de surmonter les choses que tu pensais ne pas pouvoir faire.", author: "Rikki Rogers" },
+  { text: "Tu n'as pas à contrôler tes pensées. Tu dois juste arrêter de les laisser te contrôler.", author: "Dan Millman" },
+  { text: "Ce que tu ressens est réel. Tu mérites d'être entendu·e.", author: "" },
+  { text: "Guérir n'est pas linéaire. Chaque jour où tu tiens est une victoire.", author: "" },
+  { text: "Tu es plus fort·e que tu ne le crois, même quand ça ne se voit pas.", author: "" },
+  { text: "Le calme n'est pas l'absence de tempête. C'est la paix que tu trouves à l'intérieur.", author: "Inconnu" },
+  { text: "Parfois le plus courageux des actes, c'est de simplement continuer.", author: "" },
+  { text: "Tes émotions sont de l'information, pas une condamnation.", author: "" },
+];
+
+let currentQuoteIdx = 0;
+let quoteTimer = null;
+
+function renderQuoteDots() {
+  const dots = document.getElementById('quote-dots');
+  if (!dots) return;
+  dots.innerHTML = QUOTES.map((_, i) =>
+    `<span class="quote-dot ${i === currentQuoteIdx ? 'active' : ''}"></span>`
+  ).join('');
+}
+
+function showQuote(idx) {
+  currentQuoteIdx = ((idx % QUOTES.length) + QUOTES.length) % QUOTES.length;
+  const q = QUOTES[currentQuoteIdx];
+  const textEl = document.getElementById('home-quote-text');
+  const srcEl = document.getElementById('home-quote-src');
+  if (!textEl) return;
+  textEl.textContent = q.text;
+  textEl.classList.remove('quote-fade-in');
+  void textEl.offsetWidth; // reflow
+  textEl.classList.add('quote-fade-in');
+  srcEl.textContent = q.author || '';
+  renderQuoteDots();
+}
+
+function nextQuote() {
+  showQuote(currentQuoteIdx + 1);
+  resetQuoteTimer();
+}
+
+function resetQuoteTimer() {
+  if (quoteTimer) clearInterval(quoteTimer);
+  quoteTimer = setInterval(() => showQuote(currentQuoteIdx + 1), 8000);
+}
+
+function initQuotes() {
+  // Index aléatoire au démarrage pour varier
+  currentQuoteIdx = Math.floor(Math.random() * QUOTES.length);
+  showQuote(currentQuoteIdx);
+  resetQuoteTimer();
+}
+
+window.speechSynthesis&&window.speechSynthesis.getVoices();
+if(window.speechSynthesis) window.speechSynthesis.onvoiceschanged=populateVoices;
+applySettings();
+initQuotes();
+
+// ══════════ SERVICE WORKER (PWA) ══════════
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Activer le bouton visuellement quand le prompt est prêt
+  const btn = document.getElementById('install-btn');
+  if(btn) {
+    btn.style.background = '#345A4D';
+    btn.textContent = '⬇️ Installer l\'app';
+  }
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
+  const btn = document.getElementById('install-btn');
+  if(btn) {
+    btn.textContent = '✅ App installée !';
+    btn.style.background = '#9A8A76';
+    btn.disabled = true;
+  }
+});
+
+function installApp() {
+  if(deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((result) => {
+      deferredPrompt = null;
+    });
+  } else {
+    // Détecter si déjà installée
+    if(window.matchMedia('(display-mode: standalone)').matches) {
+      alert('✅ L\'app est déjà installée sur votre appareil !');
+      return;
+    }
+    // Fallback clair selon l'OS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if(isIOS) {
+      alert('📱 Sur iPhone :\n\n1. Ouvre cette page dans Safari\n2. Appuie sur ⬆️ en bas\n3. "Sur l\'écran d\'accueil"');
+    } else {
+      alert('📱 Sur Android :\n\n1. Appuie sur ⋮ en haut à droite\n2. "Ajouter à l\'écran d\'accueil"\n\nOu attends quelques secondes — Chrome proposera l\'installation automatiquement.');
+    }
+  }
+}
+
+if('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js')
+    .then(reg => console.log('✅ SW enregistré'))
+    .catch(err => console.log('SW erreur:', err));
+}
+</script>
+</body>
+</html>
